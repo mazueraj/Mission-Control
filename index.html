@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mission Control</title>
     
-    <!-- MOBILE APP OPTIMIZATION -->
+    <!-- THE "MAKE IT AN APP" MAGIC -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mission">
+    <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- ICON: This uses a high-quality Rocket icon from Google Fonts -->
+    <!-- ICON -->
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/rocket.png">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/rocket.png">
 
@@ -21,49 +22,94 @@
             --accent-orange: #e67e22;
             --bg-gray: #f4f7f6;
             --success-green: #27ae60;
-            --warning-red: #e74c3c;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-gray); padding: 20px; display: flex; justify-content: center; margin: 0; }
-        .card { background: white; width: 100%; max-width: 650px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 25px; position: relative; margin-top: 10px; }
+
+        /* Prevent scrolling bounce and make it feel like a fixed app UI */
+        html, body { 
+            overflow-x: hidden; 
+            height: 100%;
+            margin: 0;
+            background: var(--bg-gray);
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            padding: env(safe-area-inset-top) 20px 20px 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+
+        .card { 
+            background: white; 
+            width: 100%; 
+            max-width: 650px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            padding: 25px; 
+            margin-top: 10px;
+            height: fit-content;
+        }
         
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        .next-pay { font-size: 0.9em; color: var(--accent-orange); font-weight: bold; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px; }
+        .next-pay { font-size: 0.8em; color: var(--accent-orange); font-weight: bold; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
         #deadline-alert { 
             display: none; background: #fff3cd; color: #856404; border: 1px solid #ffeeba;
-            padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;
-            font-weight: bold; animation: pulse 2s infinite;
+            padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;
+            font-weight: bold; animation: pulse 2s infinite; font-size: 0.9em;
         }
+
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0px rgba(230, 126, 34, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(230, 126, 34, 0); }
-            100% { box-shadow: 0 0 0 0px rgba(230, 126, 34, 0); }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
-        .selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .selector { 
+            display: flex; 
+            background: #eee;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px; 
+        }
+        
         button.user-btn { 
-            padding: 12px 30px; border: none; border-radius: 25px; cursor: pointer; 
-            font-weight: bold; transition: 0.3s; background: #ddd; color: #777; font-size: 1em;
+            flex: 1;
+            padding: 10px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            background: transparent; 
+            color: #777; 
+            font-size: 0.9em;
         }
-        button.active-j { background: var(--julian-blue); color: white; box-shadow: 0 4px 10px rgba(44, 62, 80, 0.3); }
-        button.active-l { background: var(--laura-pink); color: white; box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3); }
+        
+        button.active-j { background: var(--julian-blue); color: white; }
+        button.active-l { background: var(--laura-pink); color: white; }
 
-        .reset-container { text-align: center; margin-bottom: 25px; }
         .reset-btn { 
-            background: var(--success-green); color: white; border: none; padding: 15px 40px; 
-            border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 1.1em;
-            letter-spacing: 1px; transition: 0.2s; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+            width: 100%;
+            background: var(--success-green); color: white; border: none; padding: 16px; 
+            border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 1em;
+            margin-bottom: 20px;
         }
 
-        .checklist-item { display: flex; align-items: flex-start; padding: 18px; border-bottom: 1px solid #eee; transition: 0.2s; }
-        input[type="checkbox"] { transform: scale(1.6); margin-top: 5px; margin-right: 20px; cursor: pointer; }
+        .checklist-item { display: flex; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid #f0f0f0; }
+        input[type="checkbox"] { 
+            width: 22px; height: 22px; margin-top: 3px; margin-right: 15px; 
+            accent-color: var(--success-green);
+        }
+        
         .content { flex-grow: 1; }
-        .action-row { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1em; color: #333; }
+        .action-row { display: flex; justify-content: space-between; font-weight: 700; color: #333; }
         .amount { color: var(--accent-orange); }
-        .target-label { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; margin-top: 8px; background: #f0f4f8; color: #546e7a; font-weight: bold; border: 1px solid #d1d9e0; }
-        .note-box { font-size: 0.85em; color: #666; margin-top: 10px; background: #fff9f4; padding: 10px; border-radius: 6px; border-left: 4px solid var(--accent-orange); }
-        .buffer-item { background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 10px; margin-top: 15px; }
-        .checked { opacity: 0.4; background: #f1f1f1 !important; }
+        .target-label { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; text-transform: uppercase; margin-top: 6px; background: #f0f4f8; color: #546e7a; font-weight: bold; }
+        .note-box { font-size: 0.8em; color: #666; margin-top: 8px; background: #fff9f4; padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent-orange); }
+        
+        .buffer-item { background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 12px; padding: 15px; margin-top: 10px; }
+        .checked { opacity: 0.3; filter: grayscale(1); }
         .checked .action-row { text-decoration: line-through; }
     </style>
 </head>
@@ -71,20 +117,18 @@
 
 <div class="card">
     <div class="header">
-        <h1 style="letter-spacing: 2px; margin: 0; color: #2c3e50;">🚀 MISSION CONTROL</h1>
-        <div id="pay-date-display" class="next-pay">Next Mission Launch: Loading...</div>
+        <h1 style="letter-spacing: 1px; margin: 0; color: #2c3e50; font-size: 1.5em;">🚀 MISSION CONTROL</h1>
+        <div id="pay-date-display" class="next-pay">Next Launch: Loading...</div>
     </div>
 
-    <div id="deadline-alert">⚠️ STRATEGIC OVERDUE: Next pay is < 5 days away. Finalise transfers!</div>
+    <div id="deadline-alert">⚠️ OVERDUE: Pay cycle nearly ends!</div>
 
     <div class="selector">
         <button id="btnJ" class="user-btn active-j" onclick="loadProfile('julian')">Julian</button>
         <button id="btnL" class="user-btn" onclick="loadProfile('laura')">Laura</button>
     </div>
 
-    <div class="reset-container">
-        <button class="reset-btn" onclick="resetChecklist()">ALL PAID! (RESET)</button>
-    </div>
+    <button class="reset-btn" onclick="resetChecklist()">MISSION COMPLETE (RESET)</button>
 
     <div id="list-container"></div>
 </div>
@@ -100,65 +144,42 @@
 
     const data = {
         julian: [
-            { action: "Transfer to Home & Mortgage", amt: 1965.38, target: "Online Mortgage", note: "Fixed bills bundle (ME Bank, Solar, Ins, Travel)" },
-            { action: "Pay ANZ Reward Card + PT", amt: 340.00, target: "Credit Card", note: "$200 regular + $140 Personal Trainer fees" },
-            { action: "Pay Body Corporate (Rhapsody)", amt: 243.44, target: "Online Saver", note: "BPAY: Biller 96503 | Ref: 246704845 1000 0000 191" },
-            { action: "Transfer to Schooling/Tutoring", amt: 300.00, target: "Online Saver", note: "Future fees buffer" },
-            { action: "Transfer to Watch/Emilio Funds", amt: 200.00, target: "Progress Saver", note: "$100 Watch | $100 Martin Emilio" },
-            { action: "Transfer to Body Corporate (Inv)", amt: 144.00, target: "Online Transfers", note: "Extra investment levy" },
-            { action: "Hold for Health & Subs", amt: 85.00, target: "Access Advantage", note: "Stay in account for direct debits" },
-            { action: "Transfer to Project Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal Transfer" },
-            { action: "REMAINING SPENDING CASH", amt: 958.13, target: "Access Advantage", note: "Julian's Buffer", isBuffer: true }
+            { action: "Mortgage/Bills", amt: 1965.38, target: "Online Mortgage", note: "Fixed bundle" },
+            { action: "ANZ + PT Fees", amt: 340.00, target: "Credit Card", note: "$200 CC + $140 Trainer" },
+            { action: "Body Corp (Rhap)", amt: 243.44, target: "Online Saver", note: "BPAY: 96503" },
+            { action: "Schooling Buffer", amt: 300.00, target: "Online Saver", note: "Future fees" },
+            { action: "Watch/Emilio", amt: 200.00, target: "Progress Saver", note: "$100 each" },
+            { action: "Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal" },
+            { action: "REMAINING CASH", amt: 958.13, target: "Access", note: "Julian's Buffer", isBuffer: true }
         ],
         laura: [
-            { action: "Pay Hillcrest Oli", amt: 534.00, target: "Laura payments", note: "School/Care fees" },
-            { action: "Pay Groceries", amt: 450.00, target: "ANZ Rewards Plat", note: "Household grocery budget" },
-            { action: "Pay Body Corporate (Riverlily)", amt: 204.85, target: "Laura access", note: "Based on image_b292b8.png" },
-            { action: "Pay Medibank", amt: 155.00, target: "Laura payments", note: "Health insurance" },
-            { action: "Pay Travel/Credit Card", amt: 150.00, target: "Travel Credit Card", note: "Monthly repayment/savings" },
-            { action: "Pay Piano (Martin)", amt: 114.00, target: "Laura access", note: "Music lessons" },
-            { action: "Transfer to Colombia", amt: 110.00, target: "Laura access", note: "International family support" },
-            { action: "Pay Electricity & Gas", amt: 108.61, target: "Laura access", note: "Utilities bundle" },
-            { action: "Pay EMF Gym", amt: 90.00, target: "Laura access", note: "Fortnightly fitness" },
-            { action: "Pay Kids Activities (Swim/OSHC)", amt: 95.00, target: "Laura access", note: "$55 Swim + $40 OSHC" },
-            { action: "Pay Subscriptions & Flexi", amt: 64.30, target: "Laura payments", note: "$34.30 Subs + $30 Flexischools" },
-            { action: "Cash for Personal & Dining", amt: 420.00, target: "Cash", note: "$300 Dining + $120 Shopping" },
-            { action: "REMAINING SPENDING CASH", amt: 604.24, target: "Laura Access", note: "Laura's Buffer", isBuffer: true }
+            { action: "Hillcrest Oli", amt: 534.00, target: "Payments", note: "Care fees" },
+            { action: "Groceries", amt: 450.00, target: "ANZ Plat", note: "Weekly budget" },
+            { action: "Body Corp (River)", amt: 204.85, target: "Access", note: "Riverlily" },
+            { action: "Medibank", amt: 155.00, target: "Payments", note: "Health Ins" },
+            { action: "Dining/Shopping", amt: 420.00, target: "Cash", note: "$300 Eat / $120 Shop" },
+            { action: "REMAINING CASH", amt: 604.24, target: "Access", note: "Laura's Buffer", isBuffer: true }
         ]
     };
 
     function calculateNextPay(person) {
         const today = new Date();
         let nextPay = new Date(baseDates[person]);
-        while (nextPay < today) {
-            nextPay.setDate(nextPay.getDate() + 14);
-        }
+        while (nextPay < today) { nextPay.setDate(nextPay.getDate() + 14); }
         nextPayDateObj = nextPay;
-        const options = { weekday: 'long', day: 'numeric', month: 'long' };
-        document.getElementById('pay-date-display').innerText = `Next Mission Launch: ${nextPay.toLocaleDateString('en-AU', options)}`;
+        document.getElementById('pay-date-display').innerText = `Next Launch: ${nextPay.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}`;
         checkDeadlineAlert();
     }
 
     function checkDeadlineAlert() {
-        const today = new Date();
-        const diffTime = nextPayDateObj - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        const unchecked = document.querySelectorAll('input[type="checkbox"]:not(:checked)').length;
-        const alertBox = document.getElementById('deadline-alert');
-
-        if (diffDays <= 5 && unchecked > 0) {
-            alertBox.style.display = 'block';
-        } else {
-            alertBox.style.display = 'none';
-        }
+        const diffDays = Math.ceil((nextPayDateObj - new Date()) / (1000 * 60 * 60 * 24));
+        document.getElementById('deadline-alert').style.display = (diffDays <= 5) ? 'block' : 'none';
     }
 
     function loadProfile(person) {
         currentPerson = person;
         const container = document.getElementById('list-container');
         container.innerHTML = '';
-        
         document.getElementById('btnJ').className = 'user-btn ' + (person === 'julian' ? 'active-j' : '');
         document.getElementById('btnL').className = 'user-btn ' + (person === 'laura' ? 'active-l' : '');
 
@@ -166,13 +187,13 @@
             const item = document.createElement('div');
             item.className = 'checklist-item' + (itemData.isBuffer ? ' buffer-item' : '');
             item.innerHTML = `
-                <input type="checkbox" id="check-${person}-${index}" onclick="toggleCheck(this)">
+                <input type="checkbox" onclick="this.parentElement.classList.toggle('checked', this.checked)">
                 <div class="content">
                     <div class="action-row">
                         <span>${itemData.action}</span>
-                        <span class="amount">$${itemData.amt.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <span class="amount">$${itemData.amt.toFixed(2)}</span>
                     </div>
-                    <div class="target-label">Target Account: ${itemData.target}</div>
+                    <div class="target-label">${itemData.target}</div>
                     <div class="note-box">${itemData.note}</div>
                 </div>
             `;
@@ -181,21 +202,8 @@
         calculateNextPay(person);
     }
 
-    function toggleCheck(cb) {
-        cb.parentElement.classList.toggle('checked', cb.checked);
-        checkDeadlineAlert();
-    }
-
     function resetChecklist() {
-        if(confirm("Confirm all transfers complete?")) {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = false;
-                cb.parentElement.classList.remove('checked');
-            });
-            checkDeadlineAlert();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        if(confirm("Reset all for new cycle?")) { loadProfile(currentPerson); window.scrollTo(0,0); }
     }
 
     loadProfile('julian');
