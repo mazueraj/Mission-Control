@@ -2,215 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- Mobile App Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Mission Control">
-    <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Icon Links -->
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mission Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --julian-blue: #2c3e50;
-            --laura-pink: #8e44ad;
-            --accent-orange: #e67e22;
-            --bg-gray: #f4f7f6;
-            --success-green: #27ae60;
-        }
-        
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg-gray); 
-            margin: 0;
-            padding: env(safe-area-inset-top) 15px 40px 15px;
-            min-height: 100vh;
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-        }
-
-        .card { 
-            background: white; 
-            width: 100%; 
-            max-width: 500px; 
-            border-radius: 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            padding: 20px; 
-            margin-top: 10px;
-        }
-        
-        .header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; }
-        .next-pay { font-size: 0.8em; color: var(--accent-orange); font-weight: bold; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        #deadline-alert { 
-            display: none; background: #fff3cd; color: #856404; border: 1px solid #ffeeba;
-            padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center;
-            font-size: 0.85em; font-weight: bold;
-        }
-
-        .selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        button.user-btn { 
-            flex: 1; padding: 15px; border: none; border-radius: 15px; cursor: pointer; 
-            font-weight: 800; transition: 0.3s; background: #e0e0e0; color: #888; font-size: 0.9em;
-        }
-        button.active-j { background: var(--julian-blue); color: white; }
-        button.active-l { background: var(--laura-pink); color: white; }
-
-        .reset-container { text-align: center; margin-bottom: 20px; }
-        .reset-btn { 
-            width: 100%; background: var(--success-green); color: white; border: none; padding: 16px; 
-            border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 1em;
-        }
-
-        .checklist-item { display: flex; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid #f0f0f0; }
-        .checklist-item:last-child { border-bottom: none; }
-        
-        input[type="checkbox"] { transform: scale(1.4); margin-top: 4px; margin-right: 18px; min-width: 22px; }
-        
-        .content { flex-grow: 1; }
-        .action-row { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.05em; color: #2c3e50; }
-        .amount { color: var(--accent-orange); margin-left: 10px; }
-        
-        .target-label { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.65em; text-transform: uppercase; margin-top: 6px; background: #f0f4f8; color: #546e7a; font-weight: bold; border: 1px solid #d1d9e0; }
-        .note-box { font-size: 0.8em; color: #555; margin-top: 8px; background: #fff9f4; padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent-orange); }
-        
-        .buffer-item { background: #f0fdf4; border-radius: 15px; margin-top: 15px; padding: 15px; border: 1px solid #dcfce7; }
-        .checked { opacity: 0.35; filter: grayscale(1); }
-        .checked .action-row { text-decoration: line-through; }
+        body { background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
     </style>
 </head>
-<body>
+<body class="p-4">
 
-<div class="card">
-    <div class="header">
-        <h1 style="margin: 0; color: var(--julian-blue); font-size: 1.4em;">MISSION CONTROL</h1>
-        <div id="pay-date-display" class="next-pay">---</div>
+    <!-- Header & Navigation -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Mission Control</h1>
+        <button onclick="resetData()" class="text-xs text-red-500 font-medium">Reset Data</button>
     </div>
 
-    <div id="deadline-alert">⚠️ NEXT PAY < 5 DAYS AWAY!</div>
-
-    <div class="selector">
-        <button id="btnJ" class="user-btn" onclick="switchProfile('julian')">JULIAN</button>
-        <button id="btnL" class="user-btn" onclick="switchProfile('laura')">LAURA</button>
+    <div class="flex space-x-2 mb-6 bg-gray-100 p-1 rounded-lg">
+        <button onclick="showTab('goals')" id="btn-goals" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">Goals</button>
+        <button onclick="showTab('expenses')" id="btn-expenses" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">Expenses</button>
+        <button onclick="showTab('laura')" id="btn-laura" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">Laura</button>
     </div>
 
-    <div class="reset-container">
-        <button class="reset-btn" onclick="resetChecklist()">ALL PAID! (RESET)</button>
+    <!-- Goals Tab (Mission 89kg) -->
+    <div id="goals" class="tab-content active">
+        <div class="card bg-blue-50 border-blue-100">
+            <h2 class="text-sm uppercase tracking-wide text-blue-600 font-bold mb-1">Target Weight</h2>
+            <div class="text-3xl font-black text-blue-900">89.0 <span class="text-lg font-normal">kg</span></div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="card">
+                <label class="block text-xs font-bold text-gray-500 uppercase">Current</label>
+                <input type="number" id="currentWeight" step="0.1" class="w-full text-xl font-bold outline-none" placeholder="0.0" onchange="saveData()">
+            </div>
+            <div class="card">
+                <label class="block text-xs font-bold text-gray-500 uppercase">Daily Cals</label>
+                <input type="number" id="dailyCals" class="w-full text-xl font-bold outline-none" placeholder="2200" onchange="saveData()">
+            </div>
+        </div>
     </div>
 
-    <div id="list-container"></div>
-</div>
+    <!-- Expenses Tab -->
+    <div id="expenses" class="tab-content">
+        <div class="card">
+            <h2 class="font-bold mb-4">Add Expense</h2>
+            <div class="space-y-3">
+                <input type="text" id="expDesc" placeholder="Description" class="w-full p-2 border rounded">
+                <input type="number" id="expAmt" placeholder="Amount ($)" class="w-full p-2 border rounded">
+                <button onclick="addExpense()" class="w-full bg-black text-white py-3 rounded-xl font-bold">Add Item</button>
+            </div>
+        </div>
+        <div id="expenseList" class="space-y-2">
+            <!-- Items injected here -->
+        </div>
+    </div>
 
-<script>
-    const baseDates = { julian: new Date(2026, 3, 28), laura: new Date(2026, 3, 29) };
-    const data = {
-        julian: [
-            { id: 'j1', action: "Transfer to Home & Mortgage", amt: 1965.38, target: "Online Mortgage", note: "Fixed bills bundle" },
-            { id: 'j2', action: "Pay ANZ Reward Card + PT", amt: 340.00, target: "Credit Card", note: "$200 CC + $140 Trainer" },
-            { id: 'j3', action: "Pay Body Corporate (Rhapsody)", amt: 243.44, target: "Online Saver", note: "Biller 96503 | Ref 246704845" },
-            { id: 'j4', action: "Transfer to Schooling", amt: 300.00, target: "Online Saver", note: "Future fees buffer" },
-            { id: 'j5', action: "Transfer to Watch/Emilio", amt: 200.00, target: "Progress Saver", note: "$100 Watch | $100 Martin" },
-            { id: 'j6', action: "Transfer to Body Corp (Inv)", amt: 144.00, target: "Online Transfers", note: "Investment levy" },
-            { id: 'j7', action: "Hold for Health & Subs", amt: 85.00, target: "Access Advantage", note: "Stay for DDs" },
-            { id: 'j8', action: "Transfer to Project Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal Transfer" },
-            { id: 'j9', action: "REMAINING SPENDING CASH", amt: 958.13, target: "Access Advantage", note: "Julian's Buffer", isBuffer: true }
-        ],
-        laura: [
-            { id: 'l1', action: "Pay Hillcrest Oli", amt: 534.00, target: "Laura payments", note: "School fees" },
-            { id: 'l2', action: "Pay Groceries", amt: 450.00, target: "ANZ Rewards Plat", note: "Food budget" },
-            { id: 'l3', action: "Pay Body Corporate (Riverlily)", amt: 204.85, target: "Laura access", note: "StrataPay: 74625" },
-            { id: 'l4', action: "Pay Medibank", amt: 155.00, target: "Laura payments", note: "Health Insurance" },
-            { id: 'l5', action: "Pay Travel/CC", amt: 150.00, target: "Travel Card", note: "Savings/Repayments" },
-            { id: 'l6', action: "Pay Piano (Martin)", amt: 114.00, target: "Laura access", note: "Lessons" },
-            { id: 'l7', action: "Transfer to Colombia", amt: 110.00, target: "Laura access", note: "Family Support" },
-            { id: 'l8', action: "Pay Electricity & Gas", amt: 108.61, target: "Laura access", note: "Utilities" },
-            { id: 'l9', action: "Pay EMF Gym", amt: 90.00, target: "Laura access", note: "Fitness" },
-            { id: 'l10', action: "Pay Kids Activities", amt: 95.00, target: "Laura access", note: "Swim/OSHC" },
-            { id: 'l11', action: "Pay Subscriptions", amt: 64.30, target: "Laura payments", note: "Subs + Flexi" },
-            { id: 'l12', action: "Cash for Personal", amt: 420.00, target: "Cash", note: "Dining/Shopping" },
-            { id: 'l13', action: "REMAINING SPENDING CASH", amt: 604.24, target: "Laura Access", note: "Laura's Buffer", isBuffer: true }
-        ]
-    };
+    <!-- Laura Tab -->
+    <div id="laura" class="tab-content">
+        <div class="card border-pink-200 bg-pink-50">
+            <h2 class="font-bold text-pink-700">Laura's Ledger</h2>
+            <p class="text-sm text-pink-600">Track specific payments or shared goals here.</p>
+        </div>
+        <div id="lauraList" class="space-y-2"></div>
+    </div>
 
-    function saveState(id, checked) {
-        localStorage.setItem('mission_control_' + id, checked);
-    }
+    <script>
+        let appData = {
+            weight: 0,
+            cals: 2200,
+            expenses: [],
+            lauraItems: []
+        };
 
-    function getSavedState(id) {
-        return localStorage.getItem('mission_control_' + id) === 'true';
-    }
-
-    function switchProfile(person) {
-        localStorage.setItem('mission_control_active_tab', person);
-        loadProfile(person);
-    }
-
-    function loadProfile(person) {
-        const container = document.getElementById('list-container');
-        container.innerHTML = '';
-        
-        document.getElementById('btnJ').className = 'user-btn ' + (person === 'julian' ? 'active-j' : '');
-        document.getElementById('btnL').className = 'user-btn ' + (person === 'laura' ? 'active-l' : '');
-
-        data[person].forEach((itemData) => {
-            const isChecked = getSavedState(itemData.id);
-            const item = document.createElement('div');
-            item.className = 'checklist-item' + (itemData.isBuffer ? ' buffer-item' : '') + (isChecked ? ' checked' : '');
-            item.innerHTML = `
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onclick="toggleCheck('${itemData.id}', this)">
-                <div class="content">
-                    <div class="action-row"><span>${itemData.action}</span><span class="amount">$${itemData.amt.toFixed(2)}</span></div>
-                    <div class="target-label">Target: ${itemData.target}</div>
-                    <div class="note-box">${itemData.note}</div>
-                </div>`;
-            container.appendChild(item);
-        });
-        updatePayDate(person);
-    }
-
-    function toggleCheck(id, cb) {
-        cb.parentElement.classList.toggle('checked', cb.checked);
-        saveState(id, cb.checked);
-        checkAlert();
-    }
-
-    function updatePayDate(person) {
-        const today = new Date();
-        let nextPay = new Date(baseDates[person]);
-        while (nextPay < today) nextPay.setDate(nextPay.getDate() + 14);
-        
-        document.getElementById('pay-date-display').innerText = `Next Launch: ${nextPay.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}`;
-        
-        const diff = Math.ceil((nextPay - today) / (1000 * 60 * 60 * 24));
-        localStorage.setItem('current_diff', diff);
-        checkAlert();
-    }
-
-    function checkAlert() {
-        const diff = localStorage.getItem('current_diff');
-        const unchecked = document.querySelectorAll('input[type="checkbox"]:not(:checked)').length;
-        document.getElementById('deadline-alert').style.display = (diff <= 5 && unchecked > 0) ? 'block' : 'none';
-    }
-
-    function resetChecklist() {
-        if(confirm("Confirm all paid? This clears the memory for this tab.")) {
-            const activeTab = localStorage.getItem('mission_control_active_tab') || 'julian';
-            data[activeTab].forEach(item => localStorage.removeItem('mission_control_' + item.id));
-            loadProfile(activeTab);
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('bg-white', 'shadow-sm'));
+            
+            document.getElementById(tabId).classList.add('active');
+            const btn = document.getElementById('btn-' + tabId);
+            btn.classList.add('bg-white', 'shadow-sm');
         }
-    }
 
-    // On Launch
-    const savedTab = localStorage.getItem('mission_control_active_tab') || 'julian';
-    loadProfile(savedTab);
-</script>
+        function saveData() {
+            appData.weight = document.getElementById('currentWeight').value;
+            appData.cals = document.getElementById('dailyCals').value;
+            localStorage.setItem('missionControlData', JSON.stringify(appData));
+        }
+
+        function addExpense() {
+            const desc = document.getElementById('expDesc').value;
+            const amt = document.getElementById('expAmt').value;
+            if(!desc || !amt) return;
+
+            appData.expenses.push({ desc, amt, date: new Date().toLocaleDateString() });
+            document.getElementById('expDesc').value = '';
+            document.getElementById('expAmt').value = '';
+            saveData();
+            renderExpenses();
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expenseList');
+            list.innerHTML = appData.expenses.map((item, index) => `
+                <div class="flex justify-between items-center p-3 border-b">
+                    <div>
+                        <div class="font-medium">${item.desc}</div>
+                        <div class="text-xs text-gray-400">${item.date}</div>
+                    </div>
+                    <div class="font-bold">$${item.amt}</div>
+                </div>
+            `).join('');
+        }
+
+        function resetData() {
+            if(confirm('Clear all data?')) {
+                localStorage.removeItem('missionControlData');
+                location.reload();
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            const saved = localStorage.getItem('missionControlData');
+            if(saved) {
+                appData = JSON.parse(saved);
+                document.getElementById('currentWeight').value = appData.weight;
+                document.getElementById('dailyCals').value = appData.cals;
+                renderExpenses();
+            }
+            showTab('goals');
+        };
+    </script>
 </body>
 </html>
