@@ -4,253 +4,1169 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mission Control</title>
-    
-    <!-- PWA / APP SETTINGS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Mission">
-    <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Manifest for Android Install -->
-    <link rel="manifest" href="data:application/manifest+json,{'name':'Mission Control','short_name':'Mission','start_url':'.','display':'standalone','background_color':'#f4f7f6','theme_color':'#2c3e50','icons':[{'src':'https://img.icons8.com/fluency/180/rocket.png','sizes':'180x180','type':'image/png'}]}">
-
-    <!-- ICONS -->
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/rocket.png">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/rocket.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <style>
         :root {
-            --julian-blue: #2c3e50;
-            --laura-pink: #8e44ad;
-            --accent-orange: #e67e22;
-            --bg-gray: #f4f7f6;
-            --success-green: #27ae60;
+            --bg: #ffffff;
+            --surface: #f8f8f8;
+            --border: #e8e8e8;
+            --text: #111111;
+            --muted: #999999;
+            --subtle: #cccccc;
+            --green: #16a34a;
+            --amber: #d97706;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --mono: 'JetBrains Mono', monospace;
+            --body: 'Inter', sans-serif;
         }
 
-        html, body { 
-            overflow-x: hidden; 
-            height: 100%;
-            margin: 0;
-            background: var(--bg-gray);
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--body);
+            min-height: 100%;
             -webkit-tap-highlight-color: transparent;
         }
 
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            padding: env(safe-area-inset-top) 20px 40px 20px; 
-            display: flex; 
-            justify-content: center; 
+        body {
+            padding: env(safe-area-inset-top, 20px) 0 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .card { 
-            background: white; 
-            width: 100%; 
-            max-width: 650px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            padding: 25px; 
-            margin-top: 10px;
-            height: fit-content;
-            margin-bottom: 50px;
-        }
-        
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px; }
-        .next-pay { font-size: 0.85em; color: var(--accent-orange); font-weight: bold; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        #deadline-alert { 
-            display: none; background: #fff3cd; color: #856404; border: 1px solid #ffeeba;
-            padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;
-            font-weight: bold; animation: pulse 2s infinite; font-size: 0.9em;
+        .wrap {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 20px;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+        /* ── HEADER ── */
+        .header {
+            padding: 28px 0 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
         }
 
-        .selector { 
-            display: flex; 
-            background: #eee;
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 20px; 
-        }
-        
-        button.user-btn { 
-            flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; 
-            font-weight: bold; transition: 0.2s; background: transparent; color: #777; font-size: 0.9em;
-        }
-        
-        button.active-j { background: var(--julian-blue); color: white; }
-        button.active-l { background: var(--laura-pink); color: white; }
-
-        .reset-btn { 
-            width: 100%; background: var(--success-green); color: white; border: none; padding: 18px; 
-            border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 1em; margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
 
-        .checklist-item { display: flex; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid #f1f1f1; }
-        
-        input[type="checkbox"] { 
-            width: 32px; height: 32px; margin-top: 2px; margin-right: 15px; accent-color: var(--success-green); flex-shrink: 0;
+        .app-name {
+            font-size: 0.7em;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--muted);
         }
-        
-        .content { flex-grow: 1; cursor: pointer; }
-        .action-row { display: flex; justify-content: space-between; font-weight: 700; color: #333; font-size: 1.05em; align-items: center; }
-        .amount { color: var(--accent-orange); margin-right: 10px; }
-        
-        /* Note Box Accordion Logic */
-        .details { 
-            max-height: 0; 
-            overflow: hidden; 
-            transition: max-height 0.3s ease-out, opacity 0.2s; 
+
+        .pay-date {
+            font-family: var(--mono);
+            font-size: 0.72em;
+            color: var(--muted);
+        }
+
+        .pay-date.urgent { color: var(--amber); }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 10px 0;
+            margin-right: 28px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-family: var(--body);
+            font-size: 0.82em;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            margin-bottom: -1px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .tab-btn.active {
+            color: var(--text);
+            border-bottom-color: var(--text);
+        }
+
+        /* ── USER TOGGLE ── */
+        .user-toggle {
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 20px;
+        }
+
+        .user-btn {
+            flex: 1;
+            padding: 9px;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--body);
+            font-size: 0.82em;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .user-btn.active {
+            background: white;
+            color: var(--text);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* ── CHECKLIST ── */
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .checklist-item:last-child { border-bottom: none; }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--text);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .item-body { flex: 1; cursor: pointer; }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-name {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .item-amount {
+            font-family: var(--mono);
+            font-size: 0.82em;
+            color: var(--text);
+        }
+
+        .item-meta {
+            font-size: 0.75em;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .item-note {
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: var(--surface);
+            border-radius: 6px;
+            font-size: 0.78em;
+            color: var(--muted);
+            line-height: 1.5;
+            max-height: 0;
+            overflow: hidden;
             opacity: 0;
+            transition: max-height 0.25s ease, opacity 0.2s;
         }
-        .expanded .details { 
-            max-height: 200px; 
-            opacity: 1; 
+
+        .expanded .item-note { max-height: 80px; opacity: 1; }
+
+        .checked { opacity: 0.35; }
+        .checked .item-name { text-decoration: line-through; }
+
+        .group-header {
+            font-size: 0.65em;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 18px 0 6px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2px;
+        }
+
+        .group-header:first-child { padding-top: 4px; }
+
+        .buffer-row {
+            padding: 14px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        /* ── RESET BUTTON ── */
+        .reset-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--text);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--body);
+            font-size: 0.82em;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: opacity 0.15s;
+        }
+
+        .reset-btn:active { opacity: 0.7; }
+
+        /* ── DATA LAB SUMMARY ── */
+        .summary-block {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row:last-child { border-bottom: none; }
+
+        .s-label {
+            font-size: 0.8em;
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .s-value {
+            font-family: var(--mono);
+            font-size: 0.88em;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .s-value.green { color: var(--green); }
+        .s-value.amber { color: var(--amber); }
+        .s-value.red   { color: var(--red); }
+
+        /* ── PACE BAR ── */
+        .pace-section {
+            margin-bottom: 16px;
+        }
+
+        .pace-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72em;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-family: var(--mono);
+        }
+
+        .pace-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .pace-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--text);
+            transition: width 0.6s ease;
+        }
+
+        .pace-marker {
+            position: absolute;
+            top: -4px;
+            width: 2px;
+            height: 12px;
+            background: var(--amber);
+            transform: translateX(-50%);
+        }
+
+        .pace-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7em;
+            color: var(--muted);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text);
+        }
+
+        .legend-dot.amber { background: var(--amber); border-radius: 1px; width: 2px; height: 10px; }
+
+        /* ── SNOWFLAKE ── */
+        .snowflake-block {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 16px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .sf-label {
+            font-size: 0.72em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .sf-amount {
+            font-family: var(--mono);
+            font-size: 1.8em;
+            font-weight: 500;
+            color: var(--green);
+        }
+
+        .sf-sub {
+            font-size: 0.75em;
+            color: var(--muted);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* ── TRANSACTIONS LIST ── */
+        .txn-block {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .txn-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.7em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .txn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+
+        .txn-row:last-child { border-bottom: none; }
+
+        .txn-date {
+            font-family: var(--mono);
+            font-size: 0.7em;
+            color: var(--muted);
+            flex-shrink: 0;
+            width: 52px;
+        }
+
+        .txn-desc {
+            font-size: 0.78em;
+            color: var(--text);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .txn-amt {
+            font-family: var(--mono);
+            font-size: 0.78em;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        /* ── UPLOAD ── */
+        .upload-section { margin-bottom: 16px; }
+
+        .section-label {
+            font-size: 0.7em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-zone {
+            border: 1px dashed var(--subtle);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .upload-zone:hover { border-color: var(--muted); background: var(--surface); }
+        .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .upload-title { font-size: 0.82em; font-weight: 500; color: var(--text); }
+        .upload-sub { font-size: 0.72em; color: var(--muted); margin-top: 3px; }
+
+        .paste-area {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.75em;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 90px;
             margin-top: 10px;
         }
 
-        .chevron { font-size: 0.7em; transition: transform 0.3s; color: #ccc; margin-left: 5px;}
-        .expanded .chevron { transform: rotate(180deg); }
+        .paste-area::placeholder { color: var(--subtle); }
+        .paste-area:focus { outline: none; border-color: var(--muted); }
 
-        .target-label { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.7em; text-transform: uppercase; background: #f0f4f8; color: #546e7a; font-weight: bold; border: 1px solid #e2e8f0; margin-top: 5px; }
-        .note-box { font-size: 0.85em; color: #666; background: #fffaf5; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent-orange); line-height: 1.4; }
-        
-        .buffer-item { background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 14px; padding: 15px; margin-top: 12px; }
-        .checked { opacity: 0.3; filter: grayscale(1); }
-        .checked .action-row span:first-child { text-decoration: line-through; }
+        .analyse-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--text);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--body);
+            font-size: 0.82em;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.15s;
+        }
+
+        .analyse-btn:active { opacity: 0.7; }
+
+        .status-msg {
+            font-size: 0.73em;
+            color: var(--muted);
+            text-align: center;
+            padding: 10px 0 0;
+            font-family: var(--mono);
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        /* ── PANEL ── */
+        .panel { display: none; }
+        .panel.active { display: block; }
     </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="card">
+    <!-- HEADER -->
     <div class="header">
-        <h1 style="letter-spacing: 1px; margin: 0; color: #2c3e50; font-size: 1.6em;">🚀 MISSION CONTROL</h1>
-        <div id="pay-date-display" class="next-pay">Next Launch: Loading...</div>
+        <div class="header-row">
+            <span class="app-name">Mission Control</span>
+            <span class="pay-date" id="pay-date-display">Loading...</span>
+        </div>
     </div>
 
-    <div id="deadline-alert">⚠️ OVERDUE: Transfer window closing!</div>
-
-    <div class="selector">
-        <button id="btnJ" class="user-btn active-j" onclick="loadProfile('julian')">Julian</button>
-        <button id="btnL" class="user-btn" onclick="loadProfile('laura')">Laura</button>
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('checklist')">Checklist</button>
+        <button class="tab-btn" onclick="switchTab('datalab')">Data Lab</button>
     </div>
 
-    <button class="reset-btn" onclick="resetChecklist()">MISSION COMPLETE (RESET)</button>
+    <!-- ════ CHECKLIST PANEL ════ -->
+    <div id="panel-checklist" class="panel active">
 
-    <div id="list-container"></div>
+        <div class="user-toggle">
+            <button id="btnJ" class="user-btn active" onclick="loadProfile('julian')">Julian</button>
+            <button id="btnL" class="user-btn" onclick="loadProfile('laura')">Laura</button>
+        </div>
+
+        <button class="reset-btn" onclick="resetChecklist()">Mark Cycle Complete</button>
+
+        <div id="list-container"></div>
+    </div>
+
+    <!-- ════ DATA LAB PANEL ════ -->
+    <div id="panel-datalab" class="panel">
+
+        <!-- Summary -->
+        <div class="summary-block" id="summary-block">
+            <div class="summary-row">
+                <span class="s-label">Spending Budget</span>
+                <span class="s-value" id="tile-budget">—</span>
+            </div>
+            <div class="summary-row">
+                <span class="s-label">Total Spent</span>
+                <span class="s-value" id="tile-spent">—</span>
+            </div>
+            <div class="summary-row">
+                <span class="s-label">Remaining</span>
+                <span class="s-value" id="tile-remaining">—</span>
+            </div>
+            <div class="summary-row">
+                <span class="s-label">Days Left in Cycle</span>
+                <span class="s-value" id="tile-days">—</span>
+            </div>
+            <div class="summary-row">
+                <span class="s-label">Daily Burn Rate</span>
+                <span class="s-value" id="tile-daily">—</span>
+            </div>
+            <div class="summary-row">
+                <span class="s-label">Projected End Balance</span>
+                <span class="s-value" id="tile-projected">—</span>
+            </div>
+        </div>
+
+        <!-- Pace -->
+        <div class="pace-section" id="pace-section" style="display:none">
+            <div class="pace-header">
+                <span>Cycle Start</span>
+                <span id="pace-label-mid">—</span>
+                <span>Pay Day</span>
+            </div>
+            <div class="pace-track">
+                <div class="pace-fill" id="pace-fill" style="width:0%"></div>
+                <div class="pace-marker" id="pace-marker" style="left:0%"></div>
+            </div>
+            <div class="pace-legend">
+                <div class="legend-item"><div class="legend-dot"></div> Spend %</div>
+                <div class="legend-item"><div class="legend-dot amber"></div> Time elapsed</div>
+            </div>
+        </div>
+
+        <!-- Snowflake -->
+        <div class="snowflake-block" id="snowflake-block">
+            <div class="sf-label">❄ Snowflake Opportunity</div>
+            <div class="sf-amount" id="sf-amount">$0.00</div>
+            <div class="sf-sub" id="sf-sub">—</div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="txn-block" id="txn-block">
+            <div class="txn-header">Matched Transactions</div>
+            <div id="txn-list"></div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Upload -->
+        <div class="upload-section">
+            <div class="section-label">Load Transactions</div>
+
+            <div class="upload-zone" id="upload-zone">
+                <input type="file" accept=".csv,.txt,.pdf" onchange="handleFile(event)">
+                <div class="upload-title">Drop ANZ CSV export here</div>
+                <div class="upload-sub">ANZ PDF or CSV · processed entirely in your browser · no data leaves your device</div>
+            </div>
+
+            <textarea
+                class="paste-area"
+                id="paste-area"
+                placeholder="Or paste rows here:&#10;24/04/2026,COLES ROBINA,-95.00&#10;23/04/2026,KFC ROBINA,-33.90"
+            ></textarea>
+
+            <button class="analyse-btn" onclick="analyseData()">Analyse</button>
+            <div class="status-msg" id="status-msg">No data loaded</div>
+        </div>
+
+    </div>
 </div>
 
 <script>
-    let currentPerson = 'julian';
-    let nextPayDateObj = null;
-    
-    const baseDates = {
-        julian: new Date(2026, 3, 28), 
-        laura: new Date(2026, 3, 29)   
-    };
+// ═══════════════════════ DATA ═══════════════════════
 
-    const data = {
-        julian: [
-            { id: "j1", action: "Mortgage & Fixed Bills", amt: 1965.38, target: "Online Mortgage", note: "Fixed bundle (ME Bank, Solar, Ins, Travel)" },
-            { id: "j2", action: "Tennis Coaching", amt: 300.00, target: "Online Saver Transfers", note: "Weekly sessions budget" },
-            { id: "j3", action: "ANZ Rewards + PT", amt: 340.00, target: "Credit Card", note: "$200 CC + $140 Personal Trainer" },
-            { id: "j4", action: "Body Corp (Rhapsody)", amt: 243.44, target: "Online Saver Transfers", note: "BPAY: Biller 96503 | Ref: 246704845" },
-            { id: "j5", action: "Council Rates (Rhap)", amt: 95.00, target: "Online Saver Transfers", note: "Provision for rates" },
-            { id: "j6", action: "Water Rates (Rhap)", amt: 50.00, target: "Online Saver Transfers", note: "Provision for water" },
-            { id: "j7", action: "Schooling/Tutoring", amt: 300.00, target: "Online Saver Transfers", note: "Future fees budget" },
-            { id: "j8", action: "Watch & Emilio Funds", amt: 200.00, target: "Progress Saver", note: "$100 Watch | $100 Martin Emilio" },
-            { id: "j9", action: "Project Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal Transfer" },
-            { id: "j10", action: "Health & Subs", amt: 85.00, target: "Access Advantage", note: "Hold for direct debits" },
-            { id: "j11", action: "REMAINING SPENDING", amt: 513.13, target: "Access Advantage", note: "Julian's Buffer", isBuffer: true }
-        ],
-        laura: [
-            { id: "l1", action: "Hillcrest Oli", amt: 534.00, target: "Laura Payments", note: "School/Care fees" },
-            { id: "l2", action: "Groceries", amt: 450.00, target: "ANZ Rewards Plat", note: "Household grocery budget" },
-            { id: "l3", action: "Body Corp (Riverlily)", amt: 204.85, target: "Laura Access", note: "Based on latest levy" },
-            { id: "l4", action: "Medibank", amt: 155.00, target: "Laura Payments", note: "Health insurance" },
-            { id: "l5", action: "Electricity & Gas", amt: 108.61, target: "Laura Access", note: "Utilities bundle" },
-            { id: "l6", action: "Dining & Shopping", amt: 420.00, target: "Cash", note: "$300 Dining + $120 Shopping" },
-            { id: "l7", action: "REMAINING SPENDING", amt: 604.24, target: "Laura Access", note: "Laura's Buffer", isBuffer: true }
-        ]
-    };
+let currentPerson = 'julian';
+let nextPayDateObj = null;
+let cycleStartDate = null;
 
-    function saveCheckState(id, isChecked) {
-        localStorage.setItem('mission_' + id, isChecked);
-    }
+const baseDates = {
+    julian: new Date(2026, 3, 28),
+    laura:  new Date(2026, 3, 29)
+};
 
-    function getCheckState(id) {
-        return localStorage.getItem('mission_' + id) === 'true';
-    }
+const profiles = {
+    julian: [
+        // ── Online Mortgage ──────────────────────────────────────────────
+        { id:"j1",  action:"Mortgage & Fixed Bills",        amt:1965.38, target:"Online Mortgage",        note:"Fixed bundle (ME Bank, Solar, Ins, Travel)" },
+        // ── Online Saver Transfers ───────────────────────────────────────
+        { id:"j2",  action:"Tennis Coaching",               amt:300.00,  target:"Online Saver Transfers", note:"Weekly sessions budget" },
+        { id:"j4",  action:"Body Corp (Rhapsody)",          amt:243.44,  target:"Online Saver Transfers", note:"BPAY: Biller 96503 | Ref: 246704845" },
+        { id:"j5",  action:"Council Rates (Rhap)",          amt:95.00,   target:"Online Saver Transfers", note:"Provision for rates" },
+        { id:"j6",  action:"Water Rates (Rhap)",            amt:50.00,   target:"Online Saver Transfers", note:"Provision for water" },
+        { id:"j7",  action:"Schooling/Tutoring",            amt:300.00,  target:"Online Saver Transfers", note:"Future fees budget" },
+        // ── Progress Saver ───────────────────────────────────────────────
+        { id:"j8",  action:"Watch & Emilio Funds",          amt:200.00,  target:"Progress Saver",         note:"$100 Watch | $100 Martin Emilio" },
+        { id:"j9",  action:"Project Snowflake",             amt:441.00,  target:"Progress Saver",         note:"Internal Transfer" },
+        // ── Credit Card (ANZ Rewards) ────────────────────────────────────
+        { id:"j3a", action:"ANZ Rewards CC Payment",        amt:200.00,  target:"Credit Card",            note:"Base credit card payment" },
+        { id:"j3b", action:"Personal Trainer",              amt:140.00,  target:"Credit Card",            note:"Nick Coulstock — billed to CC" },
+        { id:"j12", action:"Google Storage",                amt:19.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
+        { id:"j13", action:"Car Wash & Maintenance",        amt:20.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
+        { id:"j14", action:"EV Charging",                   amt:15.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
+        { id:"j15", action:"Psychology",                    amt:50.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
+        { id:"j16", action:"Basketball & Tennis Regs",      amt:15.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
+        // ── Access Advantage ─────────────────────────────────────────────
+        { id:"j10", action:"Health & Subs",                 amt:85.00,   target:"Access Advantage",       note:"Hold for direct debits" },
+        { id:"j11", action:"REMAINING SPENDING",            amt:394.13,  target:"Access Advantage",       note:"Julian's Buffer", isBuffer:true }
+    ],
+    laura: [
+        // ── Laura Payments ───────────────────────────────────────────────
+        { id:"l1",  action:"Hillcrest Oli",          amt:500.00,  target:"Laura Payments",          note:"School/Care fees" },
+        { id:"l2",  action:"Flexischools",            amt:34.00,   target:"Laura Payments",          note:"School payments" },
+        { id:"l5",  action:"Medibank",                amt:155.00,  target:"Laura Payments",          note:"Health insurance" },
+        { id:"l22", action:"Swimming Lessons",        amt:55.00,   target:"Laura Payments",          note:"Direct debit" },
+        // ── ANZ Rewards Plat ─────────────────────────────────────────────
+        { id:"l3",  action:"Groceries",               amt:450.00,  target:"ANZ Rewards Plat",        note:"Household grocery budget" },
+        // ── ANZ Credit Card ──────────────────────────────────────────────
+        { id:"l13", action:"Credit Card",             amt:100.00,  target:"ANZ Credit Card",         note:"Monthly credit card payment" },
+        // ── BPay ─────────────────────────────────────────────────────────
+        { id:"l15", action:"HUMM",                    amt:50.00,   target:"BPay",                    note:"HUMM repayment" },
+        // ── Laura Cuenta Colombia ────────────────────────────────────────
+        { id:"l14", action:"Colombia Transfer",       amt:110.00,  target:"Laura Cuenta Colombia",   note:"Transfer to Colombia account" },
+        // ── Cash ─────────────────────────────────────────────────────────
+        { id:"l8",  action:"Dining & Shopping",       amt:273.15,  target:"Cash",                    note:"$150 Dining + $123 Shopping — adjusted to balance budget" },
+        // ── Laura Access ─────────────────────────────────────────────────
+        { id:"l4",  action:"Body Corp (Riverlily)",   amt:204.85,  target:"Laura Access",            note:"Based on latest levy" },
+        { id:"l6",  action:"Electricity",             amt:100.00,  target:"Laura Access",            note:"Electricity direct debit" },
+        { id:"l7",  action:"Gas",                     amt:100.00,  target:"Laura Access",            note:"Gas direct debit" },
+        { id:"l17", action:"Rates Riverlily",         amt:115.00,  target:"Laura Access",            note:"Council rates provision" },
+        { id:"l18", action:"Water Riverlily",         amt:130.00,  target:"Laura Access",            note:"Water rates provision" },
+        { id:"l9",  action:"Laura Gym EMF",           amt:90.00,   target:"Laura Access",            note:"Direct debit" },
+        { id:"l10", action:"OSHC Oli",                amt:40.00,   target:"Laura Access",            note:"Direct debit" },
+        { id:"l11", action:"Piano Martin",            amt:114.00,  target:"Laura Access",            note:"Music lessons" },
+        { id:"l12", action:"After the Bell Oli",      amt:60.00,   target:"Laura Access",            note:"Direct debit" },
+        { id:"l26", action:"Fortnightly Cleaning",    amt:120.00,  target:"Laura Access",            note:"Cleaning service" },
+        { id:"l21", action:"Optus",                   amt:217.00,  target:"Laura Access",            note:"Direct debit" },
+        { id:"l20", action:"Spriggy Martin",          amt:30.00,   target:"Laura Access",            note:"Kids pocket money app" },
+        { id:"l16", action:"Netflix",                 amt:20.00,   target:"Laura Access",            note:"Direct debit" },
+        { id:"l19", action:"YouTube",                 amt:17.00,   target:"Laura Access",            note:"Direct debit" },
+        { id:"l23", action:"Stan",                    amt:6.00,    target:"Laura Access",            note:"Direct debit" },
+        { id:"l24", action:"Google Storage",          amt:7.50,    target:"Laura Access",            note:"Direct debit" },
+        { id:"l25", action:"Microsoft Storage",       amt:1.50,    target:"Laura Access",            note:"Outlook storage direct debit" },
+        { id:"l27", action:"REMAINING SPENDING",      amt:0.00,    target:"Laura Access",            note:"Budget fully allocated", isBuffer:true }
+    ]
+};
 
-    function calculateNextPay(person) {
-        const today = new Date();
-        let nextPay = new Date(baseDates[person]);
-        while (nextPay < today) { nextPay.setDate(nextPay.getDate() + 14); }
-        nextPayDateObj = nextPay;
-        document.getElementById('pay-date-display').innerText = `Next Launch: ${nextPay.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}`;
-        checkDeadlineAlert();
-    }
+// ═══════════════════════ HELPERS ═══════════════════════
 
-    function checkDeadlineAlert() {
-        const diffDays = Math.ceil((nextPayDateObj - new Date()) / (1000 * 60 * 60 * 24));
-        document.getElementById('deadline-alert').style.display = (diffDays <= 5) ? 'block' : 'none';
-    }
+function fmt(n) {
+    return '$' + Math.abs(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
-    function loadProfile(person) {
-        currentPerson = person;
-        const container = document.getElementById('list-container');
-        container.innerHTML = '';
-        document.getElementById('btnJ').className = 'user-btn ' + (person === 'julian' ? 'active-j' : '');
-        document.getElementById('btnL').className = 'user-btn ' + (person === 'laura' ? 'active-l' : '');
+function saveCheck(id, v) { localStorage.setItem('mc_' + id, v); }
+function getCheck(id)      { return localStorage.getItem('mc_' + id) === 'true'; }
 
-        data[person].forEach((itemData) => {
-            const isChecked = getCheckState(itemData.id);
-            const item = document.createElement('div');
-            item.className = 'checklist-item' + (itemData.isBuffer ? ' buffer-item' : '') + (isChecked ? ' checked' : '');
-            
-            item.innerHTML = `
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="handleCheck(this, '${itemData.id}')">
-                <div class="content" onclick="this.parentElement.classList.toggle('expanded')">
-                    <div class="action-row">
-                        <span>${itemData.action}</span>
-                        <div>
-                            <span class="amount">$${itemData.amt.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                            <span class="chevron">▼</span>
-                        </div>
-                    </div>
-                    <div class="target-label">Target: ${itemData.target}</div>
-                    <div class="details">
-                        <div class="note-box">${itemData.note}</div>
-                    </div>
+// ═══════════════════════ TAB SWITCH ═══════════════════════
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', ['checklist','datalab'][i] === tab);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ═══════════════════════ CHECKLIST ═══════════════════════
+
+function calculateNextPay(person) {
+    const today = new Date();
+    let d = new Date(baseDates[person]);
+    while (d < today) d.setDate(d.getDate() + 14);
+    nextPayDateObj = d;
+    cycleStartDate = new Date(d);
+    cycleStartDate.setDate(cycleStartDate.getDate() - 14);
+
+    const daysLeft = Math.ceil((d - today) / 86400000);
+    const el = document.getElementById('pay-date-display');
+    el.textContent = `Pay ${d.toLocaleDateString('en-AU', {day:'numeric', month:'short'})} · ${daysLeft}d`;
+    el.className = 'pay-date' + (daysLeft <= 5 ? ' urgent' : '');
+}
+
+function loadProfile(person) {
+    currentPerson = person;
+    document.getElementById('btnJ').className = 'user-btn' + (person === 'julian' ? ' active' : '');
+    document.getElementById('btnL').className = 'user-btn' + (person === 'laura'  ? ' active' : '');
+
+    const container = document.getElementById('list-container');
+    container.innerHTML = '';
+
+    let lastTarget = null;
+
+    profiles[person].forEach(item => {
+        // Insert account group header when target changes
+        if (item.target !== lastTarget) {
+            const header = document.createElement('div');
+            header.className = 'group-header';
+            header.textContent = item.target;
+            container.appendChild(header);
+            lastTarget = item.target;
+        }
+
+        const checked = getCheck(item.id);
+        const el = document.createElement('div');
+        el.className = (item.isBuffer ? 'buffer-row' : 'checklist-item') + (checked ? ' checked' : '');
+
+        const isNegBuffer = item.isBuffer && item.amt < 0;
+        const amtDisplay = isNegBuffer
+            ? `<span class="item-amount" style="color:var(--red)">-${fmt(Math.abs(item.amt))}</span>`
+            : `<span class="item-amount">${fmt(item.amt)}</span>`;
+
+        el.innerHTML = `
+            <input type="checkbox" ${checked ? 'checked' : ''} onchange="handleCheck(this,'${item.id}')">
+            <div class="item-body" onclick="this.parentElement.classList.toggle('expanded')">
+                <div class="item-row">
+                    <span class="item-name">${item.action}</span>
+                    ${amtDisplay}
                 </div>
-            `;
-            container.appendChild(item);
-        });
-        calculateNextPay(person);
-    }
+                <div class="item-meta">${item.target}</div>
+                <div class="item-note">${item.note}</div>
+            </div>`;
 
-    function handleCheck(cb, id) {
-        cb.parentElement.classList.toggle('checked', cb.checked);
-        saveCheckState(id, cb.checked);
-    }
+        container.appendChild(el);
+    });
 
-    function resetChecklist() {
-        if(confirm("Reset all transfers for the new pay cycle?")) { 
-            data.julian.forEach(i => localStorage.removeItem('mission_' + i.id));
-            data.laura.forEach(i => localStorage.removeItem('mission_' + i.id));
-            loadProfile(currentPerson); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+    calculateNextPay(person);
+}
+
+function handleCheck(cb, id) {
+    const row = cb.closest('.checklist-item') || cb.closest('.buffer-row');
+    row.classList.toggle('checked', cb.checked);
+    saveCheck(id, cb.checked);
+}
+
+function resetChecklist() {
+    if (!confirm('Reset all transfers for the new pay cycle?')) return;
+    [...profiles.julian, ...profiles.laura].forEach(i => localStorage.removeItem('mc_' + i.id));
+    loadProfile(currentPerson);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════ DATA LAB ═══════════════════════
+
+// Known internal transfer patterns — exclude these from spending
+const TRANSFER_SKIP = [
+    /FUNDS TFER/i,
+    /M-BANKING.*TRANSFER/i,
+    /INTERNET BANKING.*TRANSFER/i,
+    /PAY\/SALARY/i,
+    /SALARY FROM/i,
+    /TRANSFER FROM/i,
+    /PAYMENT FROM/i,
+    /INTL PAYMENT FROM/i,
+    /REVERSAL/i,
+    /INTEREST CHARGED/i,
+    /ACCOUNT SERVICING/i,
+    /BPAY/i
+];
+
+function isTransfer(desc) {
+    return TRANSFER_SKIP.some(r => r.test(desc));
+}
+
+function parseTransactions(raw) {
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 4);
+    const txns = [];
+
+    for (const line of lines) {
+        if (/^date[,\t]/i.test(line)) continue; // header row
+
+        const parts = line.split(',');
+        if (parts.length >= 3) {
+            const dateStr = parts[0].trim();
+            if (!/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(dateStr)) continue;
+
+            const desc = parts[1].trim();
+            let amount = null;
+
+            if (parts.length >= 4) {
+                // ANZ CSV export: Date, Description, Debit, Credit columns
+                const debit  = parseFloat(parts[2].replace(/[^0-9.\-]/g, ''));
+                const credit = parseFloat(parts[3].replace(/[^0-9.\-]/g, ''));
+                if (!isNaN(debit) && debit > 0)        amount = debit;   // positive debit = spending
+                else if (!isNaN(credit) && credit > 0) amount = -credit; // negative = income
+            } else {
+                // PDF extractor output or simple Amount column:
+                // PDF writes spending as negative (e.g. -22.58), income as positive
+                amount = parseFloat(parts[parts.length - 1].replace(/[^0-9.\-]/g, ''));
+            }
+
+            if (amount === null || isNaN(amount)) continue;
+
+            // isDebit: positive in CSV debit column, OR negative from PDF (spending)
+            const isDebit = parts.length >= 4 ? amount > 0 : amount < 0;
+            txns.push({ date: dateStr, desc: desc.toUpperCase(), amount: Math.abs(amount), isDebit });
         }
     }
+    return txns;
+}
 
-    // Initialize
-    loadProfile('julian');
+function analyseData() {
+    const raw = document.getElementById('paste-area').value.trim();
+    if (!raw) {
+        setStatus('No data — paste transactions or upload a CSV file');
+        return;
+    }
+
+    const allTxns = parseTransactions(raw);
+    if (allTxns.length === 0) {
+        setStatus('Could not parse any transactions — expected format: Date, Description, Amount');
+        return;
+    }
+
+    // Only genuine spending: debits that are NOT internal transfers
+    const spending = allTxns.filter(t => t.isDebit && !isTransfer(t.desc));
+
+    const totalSpent  = spending.reduce((s, t) => s + t.amount, 0);
+    // Use the current person's buffer as the spending budget
+    const spendBudget = profiles[currentPerson].find(i => i.isBuffer)?.amt || 0;
+
+    // Days
+    const today      = new Date();
+    const daysLeft   = nextPayDateObj ? Math.max(0, Math.ceil((nextPayDateObj - today) / 86400000)) : 14;
+    const daysElapsed = 14 - daysLeft;
+    const dailyBurn  = daysElapsed > 0 ? totalSpent / daysElapsed : 0;
+    const projected  = totalSpent + (dailyBurn * daysLeft);
+    const remaining  = spendBudget - totalSpent;
+    const projectedEnd = spendBudget - projected;
+
+    const spendPct = Math.min(100, spendBudget > 0 ? (totalSpent / spendBudget) * 100 : 0);
+    const timePct  = Math.min(100, (daysElapsed / 14) * 100);
+
+    // Colour helpers
+    const overPace = spendPct > timePct + 10;
+
+    // ── Summary
+    document.getElementById('tile-budget').textContent    = fmt(spendBudget);
+    document.getElementById('tile-spent').textContent     = fmt(totalSpent);
+    document.getElementById('tile-remaining').textContent = fmt(remaining);
+    document.getElementById('tile-days').textContent      = `${daysLeft} days`;
+    document.getElementById('tile-daily').textContent     = fmt(dailyBurn) + ' / day';
+    document.getElementById('tile-projected').textContent = fmt(Math.abs(projectedEnd));
+
+    // Colour the key numbers
+    document.getElementById('tile-spent').className     = 's-value ' + (overPace ? 'amber' : 'green');
+    document.getElementById('tile-remaining').className = 's-value ' + (remaining < 0 ? 'red' : remaining < 80 ? 'amber' : 'green');
+    document.getElementById('tile-projected').className = 's-value ' + (projectedEnd < 0 ? 'red' : projectedEnd < 50 ? 'amber' : 'green');
+
+    // ── Pace
+    document.getElementById('pace-section').style.display = 'block';
+    document.getElementById('pace-fill').style.width   = spendPct + '%';
+    document.getElementById('pace-marker').style.left  = timePct + '%';
+    document.getElementById('pace-label-mid').textContent =
+        spendPct.toFixed(0) + '% spent · ' + timePct.toFixed(0) + '% elapsed';
+
+    // ── Snowflake
+    const sfBlock = document.getElementById('snowflake-block');
+    if (projectedEnd > 50) {
+        const snowflake = projectedEnd * 0.85;
+        sfBlock.style.display = 'block';
+        document.getElementById('sf-amount').textContent = fmt(snowflake);
+        document.getElementById('sf-sub').textContent    =
+            `Based on ${fmt(dailyBurn)}/day burn rate · 85% safety margin · transfer to Progress Saver`;
+    } else {
+        sfBlock.style.display = 'none';
+    }
+
+    // ── Transactions list
+    const txnBlock = document.getElementById('txn-block');
+    const txnList  = document.getElementById('txn-list');
+    if (spending.length > 0) {
+        txnBlock.style.display = 'block';
+        txnList.innerHTML = spending.slice().reverse().map(t => `
+            <div class="txn-row">
+                <span class="txn-date">${t.date}</span>
+                <span class="txn-desc">${titleCase(t.desc)}</span>
+                <span class="txn-amt">${fmt(t.amount)}</span>
+            </div>`).join('');
+    }
+
+    setStatus(`${spending.length} spending transactions · ${allTxns.length - spending.length} transfers excluded`);
+}
+
+function titleCase(str) {
+    return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).substring(0, 40);
+}
+
+function setStatus(msg) {
+    document.getElementById('status-msg').textContent = msg;
+}
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    loadFile(file);
+}
+
+function loadFile(file) {
+    setStatus('Reading ' + file.name + '…');
+    if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+        extractPdfText(file);
+    } else {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            document.getElementById('paste-area').value = ev.target.result;
+            setStatus('Loaded: ' + file.name);
+            analyseData();
+        };
+        reader.readAsText(file);
+    }
+}
+
+
+
+
+
+async function extractPdfText(file) {
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+        const MONTHS = {JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',
+                        JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12'};
+        const year = new Date().getFullYear();
+
+        // ── Collect all text items with position, per page ─────────────────
+        // For each page, bucket items into rows by Y (8px tolerance),
+        // then within each row record items separately by X so we can
+        // distinguish the Description column from the Withdrawals/Deposits columns.
+        
+        const allRows = []; // [{pageNum, y, leftText, rightItems:[{x,text}]}]
+
+        for (let p = 1; p <= pdf.numPages; p++) {
+            const page    = await pdf.getPage(p);
+            const vp      = page.getViewport({ scale: 1 });
+            const pageW   = vp.width;
+            // ANZ Transaction Report: amounts start at roughly 70% of page width
+            const splitX  = pageW * 0.68;
+
+            const content = await page.getTextContent();
+
+            // Group into Y-rows (8px bucket)
+            const yMap = {};
+            for (const item of content.items) {
+                const t = item.str; // keep spaces as-is for now
+                if (!t.trim()) continue;
+                const yKey = Math.round(item.transform[5] / 8) * 8;
+                if (!yMap[yKey]) yMap[yKey] = { left: [], right: [] };
+                if (item.transform[4] < splitX) {
+                    yMap[yKey].left.push({ x: item.transform[4], text: t.trim() });
+                } else {
+                    yMap[yKey].right.push({ x: item.transform[4], text: t.trim() });
+                }
+            }
+
+            // Sort Y descending (top of page = highest Y value in PDF space)
+            const ys = Object.keys(yMap).map(Number).sort((a, b) => b - a);
+            for (const y of ys) {
+                const bucket = yMap[y];
+                bucket.left.sort((a, b) => a.x - b.x);
+                bucket.right.sort((a, b) => a.x - b.x);
+                allRows.push({
+                    pageNum: p,
+                    y,
+                    leftText:  bucket.left.map(i => i.text).join(' ').trim(),
+                    // right has two sub-columns: Withdrawals (leftmost) and Deposits (rightmost)
+                    rightItems: bucket.right
+                });
+            }
+        }
+
+        // ── Rules ──────────────────────────────────────────────────────────
+        const DATE_RE   = /^(\d{1,2})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/i;
+        const AMT_RE    = /^[\$]?([\d,]+\.\d{2})$/;
+
+        const SKIP_NOISE = [
+            /^blank$/i,
+            /^(date|transaction details|withdrawals|deposits)$/i,
+            /^(APR|MAR|JAN|FEB|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+\d{4}$/i,
+            /^(April|March|January|February|May|June|July|August|September|October|November|December)\s+\d{4}$/i,
+            /Transaction Report/i,
+            /Australia and New Zealand/i,
+            /ANZ Internet Banking/i,
+            /ANZ ACCESS ADVANTAGE/i,
+            /^Total\b/i,
+            /^Page \d/i,
+            /Account (Number|Name|Servicing)/i,
+            /Branch Number/i,
+            /Balance as of/i,
+            /generated on/i,
+            /anz\.com/i,
+        ];
+
+        const SKIP_TXNS = [
+            /FUNDS TFER/i,
+            /M-BANKING.*TRANSFER/i,
+            /INTERNET BANKING.*TRANSFER/i,
+            /PAY\/SALARY/i,
+            /SALARY FROM/i,
+            /TRANSFER FROM/i,
+            /PAYMENT FROM/i,
+            /INTL PAYMENT FROM/i,
+            /REVERSAL/i,
+            /MCARE/i,
+            /CMC MARKETS/i,
+            /ACCOUNT SERVICING/i,
+            /DEBIT INTEREST/i,
+        ];
+
+        function isNoise(text) { return SKIP_NOISE.some(r => r.test(text.trim())); }
+        function isTransfer(text) { return SKIP_TXNS.some(r => r.test(text)); }
+        function makeDate(d, m) { return `${String(d).padStart(2,'0')}/${MONTHS[m.toUpperCase()]}/${year}`; }
+
+        // ── Parse rows ─────────────────────────────────────────────────────
+        // ANZ Transaction Report structure per transaction:
+        //   Row A (leftText): "DD MON  DESCRIPTION..."   rightItems: [{withdrawal $}] or []
+        //   Row B (leftText): "blank"                    rightItems: [{deposit $}]  or []
+        //
+        // Key insight: rightItems[0] = Withdrawals column, rightItems[1] = Deposits column
+        // (when both exist on same row — rare). More commonly only one amount column is populated.
+        // The Withdrawals column X is always less than the Deposits column X.
+        // We sort rightItems by X: first = withdrawal, last = deposit.
+        // If there's only ONE rightItem on a "blank" row → it's a deposit (skip).
+        // If there's only ONE rightItem on a date row → it's a withdrawal (spend).
+
+        const csvRows = [];
+        let pendingDate = null;
+        let pendingDesc = '';
+        let prevWasDate = false;
+
+        for (const row of allRows) {
+            if (isNoise(row.leftText) && row.rightItems.length === 0) continue;
+
+            const dm = row.leftText.match(DATE_RE);
+
+            if (dm) {
+                // ── New transaction row ──────────────────────────────────
+                pendingDate = makeDate(dm[1], dm[2]);
+                pendingDesc = row.leftText.slice(dm[0].length).trim();
+                prevWasDate = true;
+
+                // Check for amount in right column
+                if (row.rightItems.length > 0) {
+                    // Sort by X: leftmost = withdrawal, rightmost = deposit
+                    const sorted = [...row.rightItems].sort((a, b) => a.x - b.x);
+                    // If two amounts: first=withdrawal, second=deposit
+                    // If one amount on a date row: assume withdrawal (spending)
+                    const withdrawalItem = sorted[0];
+                    const amtM = withdrawalItem.text.match(/[\d,]+\.\d{2}/);
+                    if (amtM && pendingDesc && !isTransfer(pendingDesc)) {
+                        const amt = parseFloat(amtM[0].replace(/,/g,''));
+                        if (!isNaN(amt) && amt > 0) {
+                            csvRows.push(`${pendingDate},${pendingDesc.replace(/,/g,' ')},${-amt}`);
+                        }
+                    }
+                    pendingDate = null; pendingDesc = ''; prevWasDate = false;
+                }
+                // else: amount will appear on the next "blank" row
+
+            } else if (/^blank$/i.test(row.leftText.trim()) && pendingDate) {
+                // ── Amount row for a deposit (skip) or withdrawal ────────
+                // On "blank" rows, a single amount = deposit (income). Skip it.
+                // (Genuine spending amounts land on the date row itself.)
+                // So: if we get here and still have a pendingDate, it means
+                // the transaction had no withdrawal — it was a deposit-only row.
+                // Clear pending without emitting.
+                pendingDate = null; pendingDesc = ''; prevWasDate = false;
+
+            } else if (pendingDate && row.rightItems.length > 0 && !dm) {
+                // ── Fallback: amount on a non-blank continuation row ─────
+                const sorted = [...row.rightItems].sort((a, b) => a.x - b.x);
+                const amtM = sorted[0].text.match(/[\d,]+\.\d{2}/);
+                if (amtM && pendingDesc && !isTransfer(pendingDesc)) {
+                    const amt = parseFloat(amtM[0].replace(/,/g,''));
+                    if (!isNaN(amt) && amt > 0) {
+                        csvRows.push(`${pendingDate},${pendingDesc.replace(/,/g,' ')},${-amt}`);
+                    }
+                }
+                pendingDate = null; pendingDesc = ''; prevWasDate = false;
+
+            } else if (pendingDate && row.leftText && !dm) {
+                // Continuation description line
+                if (!isNoise(row.leftText)) pendingDesc += ' ' + row.leftText;
+            }
+        }
+
+        // ── Output ─────────────────────────────────────────────────────────
+        const csv = csvRows.join('\n');
+        document.getElementById('paste-area').value = csv;
+
+        if (csvRows.length === 0) {
+            setStatus('No spending transactions found in PDF — check that you uploaded the ANZ Transaction Report (not a credit card statement)');
+        } else {
+            setStatus(`PDF parsed · ${csvRows.length} spending transactions found`);
+            analyseData();
+        }
+
+    } catch (err) {
+        console.error(err);
+        setStatus('PDF error: ' + err.message);
+    }
+}
+
+// Drag & drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background = '#f8f8f8'; });
+zone.addEventListener('dragleave', () => zone.style.background = '');
+zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.background = '';
+    const file = e.dataTransfer.files[0];
+    if (file) loadFile(file);
+});
+
+// ── Init
+loadProfile('julian');
 </script>
-
 </body>
 </html>
