@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mission Control</title>
     
-    <!-- THE "MAKE IT AN APP" MAGIC -->
+    <!-- PWA / APP SETTINGS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mission">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- ICON -->
+    <!-- ICONS -->
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/rocket.png">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/rocket.png">
 
@@ -24,17 +24,17 @@
             --success-green: #27ae60;
         }
 
-        /* Prevent scrolling bounce and make it feel like a fixed app UI */
         html, body { 
             overflow-x: hidden; 
             height: 100%;
             margin: 0;
             background: var(--bg-gray);
+            -webkit-tap-highlight-color: transparent;
         }
 
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            padding: env(safe-area-inset-top) 20px 20px 20px; 
+            padding: env(safe-area-inset-top) 20px 40px 20px; 
             display: flex; 
             justify-content: center; 
         }
@@ -48,10 +48,11 @@
             padding: 25px; 
             margin-top: 10px;
             height: fit-content;
+            margin-bottom: 50px;
         }
         
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px; }
-        .next-pay { font-size: 0.8em; color: var(--accent-orange); font-weight: bold; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .next-pay { font-size: 0.85em; color: var(--accent-orange); font-weight: bold; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
         #deadline-alert { 
             display: none; background: #fff3cd; color: #856404; border: 1px solid #ffeeba;
@@ -74,42 +75,32 @@
         }
         
         button.user-btn { 
-            flex: 1;
-            padding: 10px; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            background: transparent; 
-            color: #777; 
-            font-size: 0.9em;
+            flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; 
+            font-weight: bold; transition: 0.2s; background: transparent; color: #777; font-size: 0.9em;
         }
         
         button.active-j { background: var(--julian-blue); color: white; }
         button.active-l { background: var(--laura-pink); color: white; }
 
         .reset-btn { 
-            width: 100%;
-            background: var(--success-green); color: white; border: none; padding: 16px; 
-            border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 1em;
-            margin-bottom: 20px;
+            width: 100%; background: var(--success-green); color: white; border: none; padding: 18px; 
+            border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 1em; margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
         }
 
-        .checklist-item { display: flex; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid #f0f0f0; }
+        .checklist-item { display: flex; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid #f1f1f1; }
         input[type="checkbox"] { 
-            width: 22px; height: 22px; margin-top: 3px; margin-right: 15px; 
-            accent-color: var(--success-green);
+            width: 24px; height: 24px; margin-top: 2px; margin-right: 15px; accent-color: var(--success-green);
         }
         
         .content { flex-grow: 1; }
-        .action-row { display: flex; justify-content: space-between; font-weight: 700; color: #333; }
+        .action-row { display: flex; justify-content: space-between; font-weight: 700; color: #333; font-size: 1.05em; }
         .amount { color: var(--accent-orange); }
-        .target-label { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; text-transform: uppercase; margin-top: 6px; background: #f0f4f8; color: #546e7a; font-weight: bold; }
-        .note-box { font-size: 0.8em; color: #666; margin-top: 8px; background: #fff9f4; padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent-orange); }
+        .target-label { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.7em; text-transform: uppercase; margin-top: 8px; background: #f0f4f8; color: #546e7a; font-weight: bold; border: 1px solid #e2e8f0; }
+        .note-box { font-size: 0.85em; color: #666; margin-top: 10px; background: #fffaf5; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent-orange); line-height: 1.4; }
         
-        .buffer-item { background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 12px; padding: 15px; margin-top: 10px; }
-        .checked { opacity: 0.3; filter: grayscale(1); }
+        .buffer-item { background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 14px; padding: 15px; margin-top: 12px; }
+        .checked { opacity: 0.25; filter: grayscale(1); }
         .checked .action-row { text-decoration: line-through; }
     </style>
 </head>
@@ -117,11 +108,11 @@
 
 <div class="card">
     <div class="header">
-        <h1 style="letter-spacing: 1px; margin: 0; color: #2c3e50; font-size: 1.5em;">🚀 MISSION CONTROL</h1>
+        <h1 style="letter-spacing: 1px; margin: 0; color: #2c3e50; font-size: 1.6em;">🚀 MISSION CONTROL</h1>
         <div id="pay-date-display" class="next-pay">Next Launch: Loading...</div>
     </div>
 
-    <div id="deadline-alert">⚠️ OVERDUE: Pay cycle nearly ends!</div>
+    <div id="deadline-alert">⚠️ OVERDUE: Transfer window closing!</div>
 
     <div class="selector">
         <button id="btnJ" class="user-btn active-j" onclick="loadProfile('julian')">Julian</button>
@@ -144,21 +135,24 @@
 
     const data = {
         julian: [
-            { action: "Mortgage/Bills", amt: 1965.38, target: "Online Mortgage", note: "Fixed bundle" },
-            { action: "ANZ + PT Fees", amt: 340.00, target: "Credit Card", note: "$200 CC + $140 Trainer" },
-            { action: "Body Corp (Rhap)", amt: 243.44, target: "Online Saver", note: "BPAY: 96503" },
-            { action: "Schooling Buffer", amt: 300.00, target: "Online Saver", note: "Future fees" },
-            { action: "Watch/Emilio", amt: 200.00, target: "Progress Saver", note: "$100 each" },
-            { action: "Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal" },
-            { action: "REMAINING CASH", amt: 958.13, target: "Access", note: "Julian's Buffer", isBuffer: true }
+            { action: "Mortgage & Fixed Bills", amt: 1965.38, target: "Online Mortgage", note: "Fixed bundle (ME Bank, Solar, Ins, Travel)" },
+            { action: "Tennis Coaching", amt: 300.00, target: "Online Saver Transfers", note: "Weekly sessions budget" },
+            { action: "ANZ Rewards + PT", amt: 340.00, target: "Credit Card", note: "$200 CC + $140 Personal Trainer" },
+            { action: "Body Corp (Rhapsody)", amt: 243.44, target: "Online Saver Transfers", note: "BPAY: Biller 96503 | Ref: 246704845" },
+            { action: "Schooling/Tutoring", amt: 300.00, target: "Online Saver Transfers", note: "Future fees buffer" },
+            { action: "Watch & Emilio Funds", amt: 200.00, target: "Progress Saver", note: "$100 Watch | $100 Martin Emilio" },
+            { action: "Project Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal Transfer" },
+            { action: "Health & Subs", amt: 85.00, target: "Access Advantage", note: "Hold for direct debits" },
+            { action: "REMAINING SPENDING", amt: 658.13, target: "Access Advantage", note: "Julian's Buffer", isBuffer: true }
         ],
         laura: [
-            { action: "Hillcrest Oli", amt: 534.00, target: "Payments", note: "Care fees" },
-            { action: "Groceries", amt: 450.00, target: "ANZ Plat", note: "Weekly budget" },
-            { action: "Body Corp (River)", amt: 204.85, target: "Access", note: "Riverlily" },
-            { action: "Medibank", amt: 155.00, target: "Payments", note: "Health Ins" },
-            { action: "Dining/Shopping", amt: 420.00, target: "Cash", note: "$300 Eat / $120 Shop" },
-            { action: "REMAINING CASH", amt: 604.24, target: "Access", note: "Laura's Buffer", isBuffer: true }
+            { action: "Hillcrest Oli", amt: 534.00, target: "Laura Payments", note: "School/Care fees" },
+            { action: "Groceries", amt: 450.00, target: "ANZ Rewards Plat", note: "Household grocery budget" },
+            { action: "Body Corp (Riverlily)", amt: 204.85, target: "Laura Access", note: "Based on latest levy" },
+            { action: "Medibank", amt: 155.00, target: "Laura Payments", note: "Health insurance" },
+            { action: "Electricity & Gas", amt: 108.61, target: "Laura Access", note: "Utilities bundle" },
+            { action: "Dining & Shopping", amt: 420.00, target: "Cash", note: "$300 Dining + $120 Shopping" },
+            { action: "REMAINING SPENDING", amt: 604.24, target: "Laura Access", note: "Laura's Buffer", isBuffer: true }
         ]
     };
 
@@ -191,9 +185,9 @@
                 <div class="content">
                     <div class="action-row">
                         <span>${itemData.action}</span>
-                        <span class="amount">$${itemData.amt.toFixed(2)}</span>
+                        <span class="amount">$${itemData.amt.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     </div>
-                    <div class="target-label">${itemData.target}</div>
+                    <div class="target-label">Target: ${itemData.target}</div>
                     <div class="note-box">${itemData.note}</div>
                 </div>
             `;
@@ -203,9 +197,13 @@
     }
 
     function resetChecklist() {
-        if(confirm("Reset all for new cycle?")) { loadProfile(currentPerson); window.scrollTo(0,0); }
+        if(confirm("Reset all transfers for the new pay cycle?")) { 
+            loadProfile(currentPerson); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
+    // Initialize
     loadProfile('julian');
 </script>
 
