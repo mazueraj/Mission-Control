@@ -279,62 +279,92 @@
         /* ── PACE BAR ── */
         .pace-section {
             margin-bottom: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
         }
 
-        .pace-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.72em;
+        .pace-title {
+            font-size: 0.65em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             color: var(--muted);
-            margin-bottom: 8px;
-            font-family: var(--mono);
+            font-weight: 600;
+            margin-bottom: 14px;
         }
 
-        .pace-track {
-            height: 4px;
+        .pace-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pace-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pace-bar-label {
+            font-size: 0.68em;
+            font-family: var(--mono);
+            color: var(--muted);
+            width: 42px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .pace-bar-track {
+            flex: 1;
+            height: 10px;
             background: var(--border);
-            border-radius: 2px;
+            border-radius: 5px;
+            overflow: hidden;
             position: relative;
         }
 
-        .pace-fill {
+        .pace-bar-fill {
             height: 100%;
-            border-radius: 2px;
-            background: var(--text);
-            transition: width 0.6s ease;
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
         }
 
-        .pace-marker {
-            position: absolute;
-            top: -4px;
-            width: 2px;
-            height: 12px;
-            background: var(--amber);
-            transform: translateX(-50%);
+        .pace-bar-fill.spend {
+            background: linear-gradient(90deg, #111 0%, #444 100%);
+        }
+        .pace-bar-fill.spend.warn {
+            background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+        }
+        .pace-bar-fill.spend.over {
+            background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+        }
+        .pace-bar-fill.time {
+            background: linear-gradient(90deg, #e8e8e8 0%, #d0d0d0 100%);
         }
 
-        .pace-legend {
-            display: flex;
-            gap: 16px;
-            margin-top: 8px;
+        .pace-bar-pct {
+            font-size: 0.68em;
+            font-family: var(--mono);
+            width: 34px;
+            flex-shrink: 0;
+            color: var(--text);
+            font-weight: 500;
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.7em;
-            color: var(--muted);
+        .pace-verdict {
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 500;
+            text-align: center;
         }
 
-        .legend-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text);
-        }
-
-        .legend-dot.amber { background: var(--amber); border-radius: 1px; width: 2px; height: 10px; }
+        .pace-verdict.good  { background: #f0fdf4; color: #16a34a; }
+        .pace-verdict.warn  { background: #fffbeb; color: #d97706; }
+        .pace-verdict.over  { background: #fef2f2; color: #dc2626; }
 
         /* ── SNOWFLAKE ── */
         .snowflake-block {
@@ -566,19 +596,24 @@
 
         <!-- Pace -->
         <div class="pace-section" id="pace-section" style="display:none">
-            <div class="pace-header">
-                <span>Cycle Start</span>
-                <span id="pace-label-mid">—</span>
-                <span>Pay Day</span>
+            <div class="pace-title">Spend vs Time</div>
+            <div class="pace-bars">
+                <div class="pace-bar-row">
+                    <span class="pace-bar-label">Spend</span>
+                    <div class="pace-bar-track">
+                        <div class="pace-bar-fill spend" id="pace-fill" style="width:0%"></div>
+                    </div>
+                    <span class="pace-bar-pct" id="pace-spend-pct">0%</span>
+                </div>
+                <div class="pace-bar-row">
+                    <span class="pace-bar-label">Time</span>
+                    <div class="pace-bar-track">
+                        <div class="pace-bar-fill time" id="pace-time-fill" style="width:0%"></div>
+                    </div>
+                    <span class="pace-bar-pct" id="pace-time-pct">0%</span>
+                </div>
             </div>
-            <div class="pace-track">
-                <div class="pace-fill" id="pace-fill" style="width:0%"></div>
-                <div class="pace-marker" id="pace-marker" style="left:0%"></div>
-            </div>
-            <div class="pace-legend">
-                <div class="legend-item"><div class="legend-dot"></div> Spend %</div>
-                <div class="legend-item"><div class="legend-dot amber"></div> Time elapsed</div>
-            </div>
+            <div class="pace-verdict" id="pace-verdict"></div>
         </div>
 
         <!-- Snowflake -->
@@ -731,6 +766,7 @@ function calculateNextPay(person) {
 
 function loadProfile(person) {
     currentPerson = person;
+    localStorage.setItem('mc_person', person);
     document.getElementById('btnJ').className = 'user-btn' + (person === 'julian' ? ' active' : '');
     document.getElementById('btnL').className = 'user-btn' + (person === 'laura'  ? ' active' : '');
 
@@ -897,10 +933,31 @@ function analyseData() {
 
     // ── Pace
     document.getElementById('pace-section').style.display = 'block';
-    document.getElementById('pace-fill').style.width   = spendPct + '%';
-    document.getElementById('pace-marker').style.left  = timePct + '%';
-    document.getElementById('pace-label-mid').textContent =
-        spendPct.toFixed(0) + '% spent · ' + timePct.toFixed(0) + '% elapsed';
+
+    const spendFill = document.getElementById('pace-fill');
+    spendFill.style.width = spendPct + '%';
+    spendFill.className = 'pace-bar-fill spend' +
+        (spendPct > timePct + 20 ? ' over' : spendPct > timePct + 5 ? ' warn' : '');
+
+    document.getElementById('pace-time-fill').style.width = timePct + '%';
+    document.getElementById('pace-spend-pct').textContent = spendPct.toFixed(0) + '%';
+    document.getElementById('pace-time-pct').textContent  = timePct.toFixed(0) + '%';
+
+    const verdict = document.getElementById('pace-verdict');
+    const gap = spendPct - timePct;
+    if (gap > 20) {
+        verdict.className = 'pace-verdict over';
+        verdict.textContent = `Running ${gap.toFixed(0)}% ahead of pace — tighten up`;
+    } else if (gap > 5) {
+        verdict.className = 'pace-verdict warn';
+        verdict.textContent = `Slightly ahead of pace — keep an eye on it`;
+    } else if (gap < -10) {
+        verdict.className = 'pace-verdict good';
+        verdict.textContent = `Well under pace — tracking great this cycle`;
+    } else {
+        verdict.className = 'pace-verdict good';
+        verdict.textContent = `On track — spending matches time elapsed`;
+    }
 
     // ── Snowflake
     const sfBlock = document.getElementById('snowflake-block');
@@ -1165,8 +1222,9 @@ zone.addEventListener('drop', e => {
     if (file) loadFile(file);
 });
 
-// ── Init
-loadProfile('julian');
+// ── Init — restore last selected person from localStorage
+const savedPerson = localStorage.getItem('mc_person') || 'julian';
+loadProfile(savedPerson);
 </script>
 </body>
 </html>
