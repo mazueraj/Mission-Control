@@ -91,20 +91,38 @@
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
         }
 
-        .checklist-item { display: flex; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid #f1f1f1; }
+        .checklist-item { display: flex; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid #f1f1f1; }
+        
         input[type="checkbox"] { 
-            width: 28px; height: 28px; margin-top: 2px; margin-right: 15px; accent-color: var(--success-green);
+            width: 32px; height: 32px; margin-top: 2px; margin-right: 15px; accent-color: var(--success-green); flex-shrink: 0;
         }
         
-        .content { flex-grow: 1; }
-        .action-row { display: flex; justify-content: space-between; font-weight: 700; color: #333; font-size: 1.05em; }
-        .amount { color: var(--accent-orange); }
-        .target-label { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.7em; text-transform: uppercase; margin-top: 8px; background: #f0f4f8; color: #546e7a; font-weight: bold; border: 1px solid #e2e8f0; }
-        .note-box { font-size: 0.85em; color: #666; margin-top: 10px; background: #fffaf5; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent-orange); line-height: 1.4; }
+        .content { flex-grow: 1; cursor: pointer; }
+        .action-row { display: flex; justify-content: space-between; font-weight: 700; color: #333; font-size: 1.05em; align-items: center; }
+        .amount { color: var(--accent-orange); margin-right: 10px; }
+        
+        /* Note Box Accordion Logic */
+        .details { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.3s ease-out, opacity 0.2s; 
+            opacity: 0;
+        }
+        .expanded .details { 
+            max-height: 200px; 
+            opacity: 1; 
+            margin-top: 10px;
+        }
+
+        .chevron { font-size: 0.7em; transition: transform 0.3s; color: #ccc; margin-left: 5px;}
+        .expanded .chevron { transform: rotate(180deg); }
+
+        .target-label { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.7em; text-transform: uppercase; background: #f0f4f8; color: #546e7a; font-weight: bold; border: 1px solid #e2e8f0; margin-top: 5px; }
+        .note-box { font-size: 0.85em; color: #666; background: #fffaf5; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent-orange); line-height: 1.4; }
         
         .buffer-item { background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 14px; padding: 15px; margin-top: 12px; }
-        .checked { opacity: 0.25; filter: grayscale(1); }
-        .checked .action-row { text-decoration: line-through; }
+        .checked { opacity: 0.3; filter: grayscale(1); }
+        .checked .action-row span:first-child { text-decoration: line-through; }
     </style>
 </head>
 <body>
@@ -144,7 +162,7 @@
             { id: "j4", action: "Body Corp (Rhapsody)", amt: 243.44, target: "Online Saver Transfers", note: "BPAY: Biller 96503 | Ref: 246704845" },
             { id: "j5", action: "Council Rates (Rhap)", amt: 95.00, target: "Online Saver Transfers", note: "Provision for rates" },
             { id: "j6", action: "Water Rates (Rhap)", amt: 50.00, target: "Online Saver Transfers", note: "Provision for water" },
-            { id: "j7", action: "Schooling/Tutoring", amt: 300.00, target: "Online Saver Transfers", note: "Future fees buffer" },
+            { id: "j7", action: "Schooling/Tutoring", amt: 300.00, target: "Online Saver Transfers", note: "Future fees budget" },
             { id: "j8", action: "Watch & Emilio Funds", amt: 200.00, target: "Progress Saver", note: "$100 Watch | $100 Martin Emilio" },
             { id: "j9", action: "Project Snowflake", amt: 441.00, target: "Progress Saver", note: "Internal Transfer" },
             { id: "j10", action: "Health & Subs", amt: 85.00, target: "Access Advantage", note: "Hold for direct debits" },
@@ -197,13 +215,18 @@
             
             item.innerHTML = `
                 <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="handleCheck(this, '${itemData.id}')">
-                <div class="content">
+                <div class="content" onclick="this.parentElement.classList.toggle('expanded')">
                     <div class="action-row">
                         <span>${itemData.action}</span>
-                        <span class="amount">$${itemData.amt.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <div>
+                            <span class="amount">$${itemData.amt.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            <span class="chevron">▼</span>
+                        </div>
                     </div>
                     <div class="target-label">Target: ${itemData.target}</div>
-                    <div class="note-box">${itemData.note}</div>
+                    <div class="details">
+                        <div class="note-box">${itemData.note}</div>
+                    </div>
                 </div>
             `;
             container.appendChild(item);
