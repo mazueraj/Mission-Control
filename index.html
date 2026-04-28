@@ -4,9 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mission Control</title>
+ 
+    <!-- PWA: standalone mode removes all browser chrome when installed -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mission">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+ 
+    <!-- PWA manifest inline -->
+    <link rel="manifest" href="data:application/manifest+json,{
+        %22name%22:%22Mission%20Control%22,
+        %22short_name%22:%22Mission%22,
+        %22start_url%22:%22.%22,
+        %22display%22:%22standalone%22,
+        %22background_color%22:%22%23ffffff%22,
+        %22theme_color%22:%22%23111111%22,
+        %22orientation%22:%22portrait%22,
+        %22icons%22:[{%22src%22:%22https://img.icons8.com/fluency/192/rocket.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
+    }">
+ 
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/rocket.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
