@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mission Control</title>
  
-    <!-- PWA: standalone mode removes all browser chrome when installed -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Mission">
+    <!-- Android PWA -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
  
-    <!-- PWA manifest inline -->
+    <!-- PWA manifest — enables "Add to Home Screen" / "Install App" on Android Chrome -->
     <link rel="manifest" href="data:application/manifest+json,{
         %22name%22:%22Mission%20Control%22,
         %22short_name%22:%22Mission%22,
@@ -21,10 +18,10 @@
         %22background_color%22:%22%23ffffff%22,
         %22theme_color%22:%22%23111111%22,
         %22orientation%22:%22portrait%22,
-        %22icons%22:[{%22src%22:%22https://img.icons8.com/fluency/192/rocket.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]
+        %22icons%22:[{%22src%22:%22https://img.icons8.com/fluency/192/rocket.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22},{%22src%22:%22https://img.icons8.com/fluency/512/rocket.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]
     }">
  
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/rocket.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/rocket.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
  
@@ -65,9 +62,8 @@
         }
  
         body {
-            /* safe-area-inset covers notch + home indicator on iPhone */
-            padding: max(env(safe-area-inset-top), 16px) 0
-                     max(env(safe-area-inset-bottom), 80px);
+            /* safe-area-inset covers Android gesture navigation bar */
+            padding: 16px 0 max(calc(env(safe-area-inset-bottom) + 64px), 80px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -76,9 +72,7 @@
         .wrap {
             width: 100%;
             max-width: 600px;
-            /* Horizontal padding respects safe areas on landscape */
-            padding: 0 max(env(safe-area-inset-left), 16px)
-                       0 max(env(safe-area-inset-right), 16px);
+            padding: 0 16px;
         }
  
         /* ── HEADER ── */
