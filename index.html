@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Mission">
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/rocket.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
+ 
     <style>
         :root {
             --bg: #ffffff;
@@ -25,88 +25,74 @@
             --blue: #2563eb;
             --mono: 'JetBrains Mono', monospace;
             --body: 'Inter', sans-serif;
+            /* Mobile touch target minimum */
+            --tap: 44px;
         }
-
+ 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
+        html {
+            /* Prevent font size inflation on orientation change */
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+ 
         html, body {
             background: var(--bg);
             color: var(--text);
             font-family: var(--body);
             min-height: 100%;
+            /* Prevent overscroll bounce revealing white behind */
+            overscroll-behavior: none;
             -webkit-tap-highlight-color: transparent;
         }
-
+ 
         body {
-            padding: env(safe-area-inset-top, 20px) 0 80px;
+            /* safe-area-inset covers notch + home indicator on iPhone */
+            padding: max(env(safe-area-inset-top), 16px) 0
+                     max(env(safe-area-inset-bottom), 80px);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
+ 
         .wrap {
             width: 100%;
             max-width: 600px;
-            padding: 0 20px;
+            /* Horizontal padding respects safe areas on landscape */
+            padding: 0 max(env(safe-area-inset-left), 16px)
+                       0 max(env(safe-area-inset-right), 16px);
         }
-
+ 
         /* ── HEADER ── */
         .header {
-            padding: 28px 0 20px;
+            padding: 20px 0 16px;
             border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
-
+ 
         .header-row {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
+            align-items: center;
         }
-
+ 
         .app-name {
-            font-size: 0.7em;
+            font-size: 0.68em;
             font-weight: 600;
             letter-spacing: 3px;
             text-transform: uppercase;
             color: var(--muted);
         }
-
+ 
         .pay-date {
             font-family: var(--mono);
             font-size: 0.72em;
             color: var(--muted);
         }
-
-        .pay-date.urgent { color: var(--amber); }
-
-        /* ── TABS ── */
-        .tabs {
-            display: flex;
-            gap: 0;
-            margin-bottom: 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tab-btn {
-            padding: 10px 0;
-            margin-right: 28px;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            font-family: var(--body);
-            font-size: 0.82em;
-            font-weight: 500;
-            color: var(--muted);
-            cursor: pointer;
-            margin-bottom: -1px;
-            transition: color 0.15s, border-color 0.15s;
-        }
-
-        .tab-btn.active {
-            color: var(--text);
-            border-bottom-color: var(--text);
-        }
-
+ 
+        .pay-date.urgent { color: var(--amber); font-weight: 600; }
+ 
         /* ── USER TOGGLE ── */
         .user-toggle {
             display: flex;
@@ -114,81 +100,99 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 3px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
-
+ 
         .user-btn {
             flex: 1;
-            padding: 9px;
+            /* Tall enough to tap comfortably */
+            min-height: 40px;
+            padding: 10px;
             background: none;
             border: none;
             border-radius: 6px;
             font-family: var(--body);
-            font-size: 0.82em;
+            font-size: 0.9em;
             font-weight: 500;
             color: var(--muted);
             cursor: pointer;
             transition: all 0.15s;
+            user-select: none;
+            -webkit-user-select: none;
         }
-
+ 
         .user-btn.active {
             background: white;
             color: var(--text);
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
-
+ 
         /* ── CHECKLIST ── */
         .checklist-item {
             display: flex;
             align-items: flex-start;
             gap: 14px;
+            /* Taller rows = easier to tap */
             padding: 14px 0;
             border-bottom: 1px solid var(--border);
         }
-
+ 
         .checklist-item:last-child { border-bottom: none; }
-
+ 
+        /* Larger checkboxes for mobile thumbs */
         input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-top: 2px;
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            margin-top: 1px;
             accent-color: var(--text);
             flex-shrink: 0;
             cursor: pointer;
         }
-
-        .item-body { flex: 1; cursor: pointer; }
-
+ 
+        .item-body {
+            flex: 1;
+            /* Minimum touch height on the tap area */
+            min-height: 36px;
+            cursor: pointer;
+        }
+ 
         .item-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: baseline;
+            gap: 8px;
         }
-
+ 
         .item-name {
             font-size: 0.9em;
             font-weight: 500;
             color: var(--text);
+            /* Allow long names to wrap rather than overflow */
+            word-break: break-word;
         }
-
+ 
         .item-amount {
             font-family: var(--mono);
-            font-size: 0.82em;
+            /* Must be ≥16px equivalent to prevent iOS zoom */
+            font-size: 0.85em;
             color: var(--text);
+            flex-shrink: 0;
+            white-space: nowrap;
         }
-
+ 
         .item-meta {
-            font-size: 0.75em;
+            font-size: 0.73em;
             color: var(--muted);
-            margin-top: 2px;
+            margin-top: 3px;
         }
-
+ 
         .item-note {
             margin-top: 8px;
             padding: 10px 12px;
             background: var(--surface);
             border-radius: 6px;
-            font-size: 0.78em;
+            font-size: 0.8em;
             color: var(--muted);
             line-height: 1.5;
             max-height: 0;
@@ -196,288 +200,285 @@
             opacity: 0;
             transition: max-height 0.25s ease, opacity 0.2s;
         }
-
-        .expanded .item-note { max-height: 80px; opacity: 1; }
-
+ 
+        .expanded .item-note { max-height: 120px; opacity: 1; }
+ 
         .checked { opacity: 0.35; }
         .checked .item-name { text-decoration: line-through; }
-
+ 
         .group-header {
-            font-size: 0.65em;
+            font-size: 0.63em;
             font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--muted);
-            padding: 18px 0 6px;
+            padding: 16px 0 5px;
             border-bottom: 1px solid var(--border);
             margin-bottom: 2px;
         }
-
-        .group-header:first-child { padding-top: 4px; }
-
+ 
+        .group-header:first-child { padding-top: 0; }
+ 
         .buffer-row {
             padding: 14px 0;
             display: flex;
             align-items: flex-start;
             gap: 14px;
         }
-
+ 
         /* ── RESET BUTTON ── */
         .reset-btn {
             width: 100%;
-            padding: 13px;
+            /* Minimum 44px tap target */
+            min-height: var(--tap);
+            padding: 12px 16px;
             background: var(--text);
             color: white;
             border: none;
             border-radius: 8px;
             font-family: var(--body);
-            font-size: 0.82em;
+            font-size: 0.88em;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             cursor: pointer;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             transition: opacity 0.15s;
+            /* Prevent double-tap zoom on button */
+            touch-action: manipulation;
         }
-
+ 
         .reset-btn:active { opacity: 0.7; }
-
+ 
         /* ── DATA LAB SUMMARY ── */
         .summary-block {
             border: 1px solid var(--border);
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
-
+ 
         .summary-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
+            padding: 13px 16px;
             border-bottom: 1px solid var(--border);
+            min-height: var(--tap);
         }
-
+ 
         .summary-row:last-child { border-bottom: none; }
-
+ 
         .s-label {
-            font-size: 0.8em;
+            font-size: 0.82em;
             color: var(--muted);
-            font-weight: 400;
         }
-
+ 
         .s-value {
             font-family: var(--mono);
-            font-size: 0.88em;
+            /* Keep ≥13px to avoid iOS zoom on any nearby inputs */
+            font-size: 0.9em;
             font-weight: 500;
             color: var(--text);
         }
-
+ 
         .s-value.green { color: var(--green); }
         .s-value.amber { color: var(--amber); }
         .s-value.red   { color: var(--red); }
-
+ 
         /* ── PACE BAR ── */
         .pace-section {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px;
         }
-
+ 
         .pace-title {
             font-size: 0.65em;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--muted);
             font-weight: 600;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
-
-        .pace-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .pace-bar-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+ 
+        .pace-bars { display: flex; flex-direction: column; gap: 10px; }
+ 
+        .pace-bar-row { display: flex; align-items: center; gap: 10px; }
+ 
         .pace-bar-label {
-            font-size: 0.68em;
+            font-size: 0.7em;
             font-family: var(--mono);
             color: var(--muted);
-            width: 42px;
+            width: 38px;
             flex-shrink: 0;
             text-align: right;
         }
-
+ 
         .pace-bar-track {
             flex: 1;
-            height: 10px;
+            /* Taller bar = easier to see on small screen */
+            height: 12px;
             background: var(--border);
-            border-radius: 5px;
+            border-radius: 6px;
             overflow: hidden;
-            position: relative;
         }
-
+ 
         .pace-bar-fill {
             height: 100%;
-            border-radius: 5px;
+            border-radius: 6px;
             transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
-            position: relative;
         }
-
-        .pace-bar-fill.spend {
-            background: linear-gradient(90deg, #111 0%, #444 100%);
-        }
-        .pace-bar-fill.spend.warn {
-            background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
-        }
-        .pace-bar-fill.spend.over {
-            background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
-        }
-        .pace-bar-fill.time {
-            background: linear-gradient(90deg, #e8e8e8 0%, #d0d0d0 100%);
-        }
-
+ 
+        .pace-bar-fill.spend  { background: linear-gradient(90deg,#111,#444); }
+        .pace-bar-fill.spend.warn { background: linear-gradient(90deg,#d97706,#f59e0b); }
+        .pace-bar-fill.spend.over { background: linear-gradient(90deg,#dc2626,#ef4444); }
+        .pace-bar-fill.time   { background: linear-gradient(90deg,#e8e8e8,#d0d0d0); }
+ 
         .pace-bar-pct {
-            font-size: 0.68em;
+            font-size: 0.7em;
             font-family: var(--mono);
-            width: 34px;
+            width: 32px;
             flex-shrink: 0;
             color: var(--text);
             font-weight: 500;
+            text-align: right;
         }
-
+ 
         .pace-verdict {
-            margin-top: 12px;
+            margin-top: 10px;
             padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.75em;
+            font-size: 0.78em;
             font-weight: 500;
             text-align: center;
         }
-
-        .pace-verdict.good  { background: #f0fdf4; color: #16a34a; }
-        .pace-verdict.warn  { background: #fffbeb; color: #d97706; }
-        .pace-verdict.over  { background: #fef2f2; color: #dc2626; }
-
+ 
+        .pace-verdict.good { background:#f0fdf4; color:#16a34a; }
+        .pace-verdict.warn { background:#fffbeb; color:#d97706; }
+        .pace-verdict.over { background:#fef2f2; color:#dc2626; }
+ 
         /* ── SNOWFLAKE ── */
         .snowflake-block {
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 18px 16px;
-            margin-bottom: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
             display: none;
         }
-
+ 
         .sf-label {
-            font-size: 0.72em;
+            font-size: 0.7em;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--muted);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
-
+ 
         .sf-amount {
             font-family: var(--mono);
-            font-size: 1.8em;
+            font-size: 1.7em;
             font-weight: 500;
             color: var(--green);
         }
-
+ 
         .sf-sub {
             font-size: 0.75em;
             color: var(--muted);
             margin-top: 4px;
             line-height: 1.4;
         }
-
-        /* ── TRANSACTIONS LIST ── */
+ 
+        /* ── TRANSACTIONS ── */
         .txn-block {
             border: 1px solid var(--border);
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             display: none;
         }
-
+ 
         .txn-header {
-            padding: 12px 16px;
+            padding: 11px 14px;
             border-bottom: 1px solid var(--border);
-            font-size: 0.7em;
+            font-size: 0.68em;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--muted);
             font-weight: 500;
         }
-
+ 
         .txn-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 11px 16px;
+            padding: 10px 14px;
             border-bottom: 1px solid var(--border);
-            gap: 12px;
+            gap: 10px;
+            /* Minimum tap height */
+            min-height: 40px;
         }
-
+ 
         .txn-row:last-child { border-bottom: none; }
-
+ 
         .txn-date {
             font-family: var(--mono);
             font-size: 0.7em;
             color: var(--muted);
             flex-shrink: 0;
-            width: 52px;
+            width: 48px;
         }
-
+ 
         .txn-desc {
-            font-size: 0.78em;
+            font-size: 0.8em;
             color: var(--text);
             flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
+ 
         .txn-amt {
             font-family: var(--mono);
-            font-size: 0.78em;
+            font-size: 0.8em;
             color: var(--text);
             flex-shrink: 0;
         }
-
-        /* ── UPLOAD ── */
-        .upload-section { margin-bottom: 16px; }
-
+ 
+        /* ── UPLOAD / DATA LAB ── */
+        .upload-section { margin-bottom: 14px; }
+ 
         .section-label {
-            font-size: 0.7em;
+            font-size: 0.68em;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--muted);
             margin-bottom: 10px;
             font-weight: 500;
         }
-
+ 
         .upload-zone {
-            border: 1px dashed var(--subtle);
+            border: 1.5px dashed var(--subtle);
             border-radius: 8px;
-            padding: 24px;
+            /* Generous touch area */
+            padding: 28px 16px;
             text-align: center;
             cursor: pointer;
             position: relative;
             transition: border-color 0.15s, background 0.15s;
+            touch-action: manipulation;
         }
-
-        .upload-zone:hover { border-color: var(--muted); background: var(--surface); }
-        .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-        .upload-title { font-size: 0.82em; font-weight: 500; color: var(--text); }
-        .upload-sub { font-size: 0.72em; color: var(--muted); margin-top: 3px; }
-
+ 
+        .upload-zone:active { background: var(--surface); }
+        .upload-zone input {
+            position: absolute; inset: 0; opacity: 0;
+            cursor: pointer; width: 100%; height: 100%;
+        }
+ 
+        .upload-title { font-size: 0.85em; font-weight: 500; color: var(--text); }
+        .upload-sub { font-size: 0.73em; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+ 
         .paste-area {
             width: 100%;
             background: var(--surface);
@@ -486,56 +487,400 @@
             padding: 12px 14px;
             color: var(--text);
             font-family: var(--mono);
-            font-size: 0.75em;
-            line-height: 1.6;
+            /* CRITICAL: must be ≥16px to prevent iOS zoom-on-focus */
+            font-size: 16px;
+            line-height: 1.5;
             resize: vertical;
             min-height: 90px;
             margin-top: 10px;
+            /* Smooth momentum scroll inside textarea */
+            -webkit-overflow-scrolling: touch;
         }
-
+ 
         .paste-area::placeholder { color: var(--subtle); }
         .paste-area:focus { outline: none; border-color: var(--muted); }
-
+ 
         .analyse-btn {
             width: 100%;
-            padding: 12px;
+            min-height: var(--tap);
+            padding: 12px 16px;
             background: var(--text);
             color: white;
             border: none;
             border-radius: 8px;
             font-family: var(--body);
-            font-size: 0.82em;
+            font-size: 0.9em;
             font-weight: 500;
             cursor: pointer;
             margin-top: 10px;
             transition: opacity 0.15s;
+            touch-action: manipulation;
         }
-
+ 
         .analyse-btn:active { opacity: 0.7; }
-
+ 
         .status-msg {
             font-size: 0.73em;
             color: var(--muted);
             text-align: center;
             padding: 10px 0 0;
             font-family: var(--mono);
+            line-height: 1.4;
         }
-
-        /* ── DIVIDER ── */
+ 
         .divider {
             border: none;
             border-top: 1px solid var(--border);
-            margin: 20px 0;
+            margin: 18px 0;
         }
-
+ 
         /* ── PANEL ── */
         .panel { display: none; }
         .panel.active { display: block; }
+ 
+        /* ── PLAN TAB ── */
+        .plan-header { margin-bottom: 16px; }
+ 
+        .plan-progress-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+ 
+        .plan-progress-label {
+            font-size: 0.63em;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+ 
+        .plan-progress-count {
+            font-family: var(--mono);
+            font-size: 0.75em;
+            font-weight: 500;
+            color: var(--text);
+        }
+ 
+        .plan-progress-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+ 
+        .plan-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), #34d399);
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+ 
+        .plan-progress-sub {
+            font-size: 0.72em;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+ 
+        .plan-phase { margin-bottom: 20px; }
+ 
+        .plan-phase-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            /* Wrap gracefully on small screens */
+            flex-wrap: wrap;
+        }
+ 
+        .plan-phase-header.ph0 { background:#f0fdf4; }
+        .plan-phase-header.ph1 { background:#eff6ff; }
+        .plan-phase-header.ph2 { background:#f5f3ff; }
+        .plan-phase-header.ph3 { background:#f0fdf4; }
+        .plan-phase-header.phM { background:#f8f9fa; }
+ 
+        .plan-phase-pill {
+            font-size: 0.62em;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+ 
+        .ph0 .plan-phase-pill { background:var(--green); color:white; }
+        .ph1 .plan-phase-pill { background:var(--blue);  color:white; }
+        .ph2 .plan-phase-pill { background:#7c3aed;      color:white; }
+        .ph3 .plan-phase-pill { background:var(--green); color:white; }
+        .phM .plan-phase-pill { background:var(--text);  color:white; }
+ 
+        .plan-phase-title {
+            font-size: 0.84em;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+        }
+ 
+        .plan-phase-period {
+            font-size: 0.7em;
+            color: var(--muted);
+            font-family: var(--mono);
+            /* Hide on very narrow screens to prevent overflow */
+        }
+ 
+        .plan-phase-prog {
+            font-size: 0.72em;
+            color: var(--muted);
+            font-family: var(--mono);
+            font-weight: 600;
+        }
+ 
+        /* Action card */
+        .plan-action {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+ 
+        .plan-action:last-child { border-bottom: none; }
+        .plan-action.done { opacity: 0.38; }
+        .plan-action.done .plan-action-title { text-decoration: line-through; }
+ 
+        .plan-action input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            margin-top: 2px;
+            accent-color: var(--green);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+ 
+        .plan-action-body {
+            flex: 1;
+            min-width: 0; /* Prevent flex child overflow */
+            cursor: pointer;
+        }
+ 
+        .plan-action-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 6px;
+        }
+ 
+        .plan-action-num {
+            font-family: var(--mono);
+            font-size: 0.68em;
+            color: var(--muted);
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+ 
+        .plan-action-title {
+            font-size: 0.88em;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+            min-width: 0;
+            /* Allow wrapping on mobile */
+            word-break: break-word;
+        }
+ 
+        .plan-action-badge {
+            font-size: 0.60em;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            margin-top: 1px;
+        }
+ 
+        .badge-done    { background:#f0fdf4; color:var(--green); }
+        .badge-motion  { background:#eff6ff; color:var(--blue); }
+        .badge-week    { background:#fffbeb; color:var(--amber); }
+        .badge-upcoming{ background:#f8f9fa; color:var(--muted); }
+        .badge-martin  { background:#f8f9fa; color:var(--text); }
+ 
+        .plan-action-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+ 
+        .plan-action-owner {
+            font-size: 0.72em;
+            color: var(--muted);
+        }
+ 
+        .plan-action-deadline {
+            font-family: var(--mono);
+            font-size: 0.7em;
+            color: var(--muted);
+        }
+ 
+        .plan-action-deadline.urgent  { color:var(--amber); font-weight:600; }
+        .plan-action-deadline.overdue { color:var(--red);   font-weight:600; }
+ 
+        .plan-action-detail {
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: var(--surface);
+            border-radius: 6px;
+            font-size: 0.8em;
+            color: var(--muted);
+            line-height: 1.55;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.28s ease, opacity 0.2s;
+        }
+ 
+        .plan-action.expanded .plan-action-detail {
+            max-height: 160px;
+            opacity: 1;
+        }
+ 
+        .plan-action-impact {
+            margin-top: 6px;
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--green);
+        }
+ 
+        .plan-nw-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+ 
+        .plan-nw-label {
+            font-size: 0.68em;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 600;
+        }
+ 
+        .plan-nw-val {
+            font-family: var(--mono);
+            font-size: 1.05em;
+            font-weight: 600;
+            color: var(--green);
+            white-space: nowrap;
+        }
+ 
+        .plan-nw-target {
+            font-size: 0.7em;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+ 
+        /* ── RESPONSIVE BREAKPOINTS ── */
+ 
+        /* Phones narrower than 380px */
+        @media (max-width: 380px) {
+            .wrap { padding: 0 12px; }
+            .plan-phase-period { display: none; }
+            .item-name { font-size: 0.86em; }
+            .plan-action-title { font-size: 0.84em; }
+            .sf-amount { font-size: 1.4em; }
+        }
+ 
+        @media (min-width: 480px) {
+            .item-name { font-size: 0.92em; }
+        }
+ 
+        /* ── BOTTOM NAV ── */
+        /* Push panels above the nav bar */
+        body {
+            padding-bottom: max(calc(env(safe-area-inset-bottom) + 64px), 80px);
+        }
+ 
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(64px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background: rgba(255,255,255,0.92);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: stretch;
+            z-index: 100;
+        }
+ 
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 4px 6px;
+            color: var(--muted);
+            font-family: var(--body);
+            font-size: 0.62em;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: color 0.15s;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            position: relative;
+        }
+ 
+        .nav-btn.active { color: var(--text); }
+ 
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 1.6;
+            transition: stroke 0.15s;
+        }
+ 
+        /* Active indicator dot above icon */
+        .nav-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--text);
+        }
+ 
+        .nav-btn:active { opacity: 0.6; }
+ 
     </style>
 </head>
 <body>
 <div class="wrap">
-
+ 
     <!-- HEADER -->
     <div class="header">
         <div class="header-row">
@@ -543,29 +888,39 @@
             <span class="pay-date" id="pay-date-display">Loading...</span>
         </div>
     </div>
-
-    <!-- TABS -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('checklist')">Checklist</button>
-        <button class="tab-btn" onclick="switchTab('datalab')">Data Lab</button>
-    </div>
-
+ 
     <!-- ════ CHECKLIST PANEL ════ -->
     <div id="panel-checklist" class="panel active">
-
+ 
         <div class="user-toggle">
             <button id="btnJ" class="user-btn active" onclick="loadProfile('julian')">Julian</button>
             <button id="btnL" class="user-btn" onclick="loadProfile('laura')">Laura</button>
         </div>
-
+ 
         <button class="reset-btn" onclick="resetChecklist()">Mark Cycle Complete</button>
-
+ 
         <div id="list-container"></div>
     </div>
-
-    <!-- ════ DATA LAB PANEL ════ -->
-    <div id="panel-datalab" class="panel">
-
+ 
+    <!-- ════ PLAN PANEL ════ -->
+    <div id="panel-plan" class="panel">
+ 
+        <!-- Progress header -->
+        <div class="plan-header">
+            <div class="plan-progress-row">
+                <span class="plan-progress-label">THE MARTIN PLAN</span>
+                <span class="plan-progress-count" id="plan-count">0 of 18</span>
+            </div>
+            <div class="plan-progress-track">
+                <div class="plan-progress-fill" id="plan-progress-fill" style="width:0%"></div>
+            </div>
+            <div class="plan-progress-sub" id="plan-progress-sub">Loading...</div>
+        </div>
+ 
+        <div id="plan-container"></div>
+ 
+    </div>
+ 
         <!-- Summary -->
         <div class="summary-block" id="summary-block">
             <div class="summary-row">
@@ -593,7 +948,7 @@
                 <span class="s-value" id="tile-projected">—</span>
             </div>
         </div>
-
+ 
         <!-- Pace -->
         <div class="pace-section" id="pace-section" style="display:none">
             <div class="pace-title">Spend vs Time</div>
@@ -615,57 +970,57 @@
             </div>
             <div class="pace-verdict" id="pace-verdict"></div>
         </div>
-
+ 
         <!-- Snowflake -->
         <div class="snowflake-block" id="snowflake-block">
             <div class="sf-label">❄ Snowflake Opportunity</div>
             <div class="sf-amount" id="sf-amount">$0.00</div>
             <div class="sf-sub" id="sf-sub">—</div>
         </div>
-
+ 
         <!-- Transactions -->
         <div class="txn-block" id="txn-block">
             <div class="txn-header">Matched Transactions</div>
             <div id="txn-list"></div>
         </div>
-
+ 
         <hr class="divider">
-
+ 
         <!-- Upload -->
         <div class="upload-section">
             <div class="section-label">Load Transactions</div>
-
+ 
             <div class="upload-zone" id="upload-zone">
                 <input type="file" accept=".csv,.txt,.pdf" onchange="handleFile(event)">
                 <div class="upload-title">Drop ANZ CSV export here</div>
                 <div class="upload-sub">ANZ PDF or CSV · processed entirely in your browser · no data leaves your device</div>
             </div>
-
+ 
             <textarea
                 class="paste-area"
                 id="paste-area"
                 placeholder="Or paste rows here:&#10;24/04/2026,COLES ROBINA,-95.00&#10;23/04/2026,KFC ROBINA,-33.90"
             ></textarea>
-
+ 
             <button class="analyse-btn" onclick="analyseData()">Analyse</button>
             <div class="status-msg" id="status-msg">No data loaded</div>
         </div>
-
+ 
     </div>
 </div>
-
+ 
 <script>
 // ═══════════════════════ DATA ═══════════════════════
-
+ 
 let currentPerson = 'julian';
 let nextPayDateObj = null;
 let cycleStartDate = null;
-
+ 
 const baseDates = {
     julian: new Date(2026, 3, 28),
     laura:  new Date(2026, 3, 29)
 };
-
+ 
 const profiles = {
     julian: [
         // ── Online Mortgage ──────────────────────────────────────────────
@@ -728,28 +1083,36 @@ const profiles = {
         { id:"l27", action:"REMAINING SPENDING",      amt:0.00,    target:"Laura Access",            note:"Budget fully allocated", isBuffer:true }
     ]
 };
-
+ 
 // ═══════════════════════ HELPERS ═══════════════════════
-
+ 
 function fmt(n) {
     return '$' + Math.abs(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-
+ 
 function saveCheck(id, v) { localStorage.setItem('mc_' + id, v); }
 function getCheck(id)      { return localStorage.getItem('mc_' + id) === 'true'; }
-
+ 
 // ═══════════════════════ TAB SWITCH ═══════════════════════
-
+ 
 function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b, i) => {
-        b.classList.toggle('active', ['checklist','datalab'][i] === tab);
+    const tabs = ['checklist', 'datalab', 'plan'];
+    // Update nav buttons
+    tabs.forEach(t => {
+        const btn = document.getElementById('nav-' + t);
+        if (btn) btn.classList.toggle('active', t === tab);
     });
+    // Show correct panel
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + tab).classList.add('active');
+    // Render plan on first open
+    if (tab === 'plan') renderPlan();
+    // Scroll to top on tab switch — feels native
+    window.scrollTo({ top: 0, behavior: 'instant' });
 }
-
+ 
 // ═══════════════════════ CHECKLIST ═══════════════════════
-
+ 
 function calculateNextPay(person) {
     const today = new Date();
     let d = new Date(baseDates[person]);
@@ -757,24 +1120,24 @@ function calculateNextPay(person) {
     nextPayDateObj = d;
     cycleStartDate = new Date(d);
     cycleStartDate.setDate(cycleStartDate.getDate() - 14);
-
+ 
     const daysLeft = Math.ceil((d - today) / 86400000);
     const el = document.getElementById('pay-date-display');
     el.textContent = `Pay ${d.toLocaleDateString('en-AU', {day:'numeric', month:'short'})} · ${daysLeft}d`;
     el.className = 'pay-date' + (daysLeft <= 5 ? ' urgent' : '');
 }
-
+ 
 function loadProfile(person) {
     currentPerson = person;
     localStorage.setItem('mc_person', person);
     document.getElementById('btnJ').className = 'user-btn' + (person === 'julian' ? ' active' : '');
     document.getElementById('btnL').className = 'user-btn' + (person === 'laura'  ? ' active' : '');
-
+ 
     const container = document.getElementById('list-container');
     container.innerHTML = '';
-
+ 
     let lastTarget = null;
-
+ 
     profiles[person].forEach(item => {
         // Insert account group header when target changes
         if (item.target !== lastTarget) {
@@ -784,16 +1147,16 @@ function loadProfile(person) {
             container.appendChild(header);
             lastTarget = item.target;
         }
-
+ 
         const checked = getCheck(item.id);
         const el = document.createElement('div');
         el.className = (item.isBuffer ? 'buffer-row' : 'checklist-item') + (checked ? ' checked' : '');
-
+ 
         const isNegBuffer = item.isBuffer && item.amt < 0;
         const amtDisplay = isNegBuffer
             ? `<span class="item-amount" style="color:var(--red)">-${fmt(Math.abs(item.amt))}</span>`
             : `<span class="item-amount">${fmt(item.amt)}</span>`;
-
+ 
         el.innerHTML = `
             <input type="checkbox" ${checked ? 'checked' : ''} onchange="handleCheck(this,'${item.id}')">
             <div class="item-body" onclick="this.parentElement.classList.toggle('expanded')">
@@ -804,28 +1167,28 @@ function loadProfile(person) {
                 <div class="item-meta">${item.target}</div>
                 <div class="item-note">${item.note}</div>
             </div>`;
-
+ 
         container.appendChild(el);
     });
-
+ 
     calculateNextPay(person);
 }
-
+ 
 function handleCheck(cb, id) {
     const row = cb.closest('.checklist-item') || cb.closest('.buffer-row');
     row.classList.toggle('checked', cb.checked);
     saveCheck(id, cb.checked);
 }
-
+ 
 function resetChecklist() {
     if (!confirm('Reset all transfers for the new pay cycle?')) return;
     [...profiles.julian, ...profiles.laura].forEach(i => localStorage.removeItem('mc_' + i.id));
     loadProfile(currentPerson);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
+ 
 // ═══════════════════════ DATA LAB ═══════════════════════
-
+ 
 // Known internal transfer patterns — exclude these from spending
 const TRANSFER_SKIP = [
     /FUNDS TFER/i,
@@ -841,26 +1204,26 @@ const TRANSFER_SKIP = [
     /ACCOUNT SERVICING/i,
     /BPAY/i
 ];
-
+ 
 function isTransfer(desc) {
     return TRANSFER_SKIP.some(r => r.test(desc));
 }
-
+ 
 function parseTransactions(raw) {
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 4);
     const txns = [];
-
+ 
     for (const line of lines) {
         if (/^date[,\t]/i.test(line)) continue; // header row
-
+ 
         const parts = line.split(',');
         if (parts.length >= 3) {
             const dateStr = parts[0].trim();
             if (!/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(dateStr)) continue;
-
+ 
             const desc = parts[1].trim();
             let amount = null;
-
+ 
             if (parts.length >= 4) {
                 // ANZ CSV export: Date, Description, Debit, Credit columns
                 const debit  = parseFloat(parts[2].replace(/[^0-9.\-]/g, ''));
@@ -872,9 +1235,9 @@ function parseTransactions(raw) {
                 // PDF writes spending as negative (e.g. -22.58), income as positive
                 amount = parseFloat(parts[parts.length - 1].replace(/[^0-9.\-]/g, ''));
             }
-
+ 
             if (amount === null || isNaN(amount)) continue;
-
+ 
             // isDebit: positive in CSV debit column, OR negative from PDF (spending)
             const isDebit = parts.length >= 4 ? amount > 0 : amount < 0;
             txns.push({ date: dateStr, desc: desc.toUpperCase(), amount: Math.abs(amount), isDebit });
@@ -882,27 +1245,27 @@ function parseTransactions(raw) {
     }
     return txns;
 }
-
+ 
 function analyseData() {
     const raw = document.getElementById('paste-area').value.trim();
     if (!raw) {
         setStatus('No data — paste transactions or upload a CSV file');
         return;
     }
-
+ 
     const allTxns = parseTransactions(raw);
     if (allTxns.length === 0) {
         setStatus('Could not parse any transactions — expected format: Date, Description, Amount');
         return;
     }
-
+ 
     // Only genuine spending: debits that are NOT internal transfers
     const spending = allTxns.filter(t => t.isDebit && !isTransfer(t.desc));
-
+ 
     const totalSpent  = spending.reduce((s, t) => s + t.amount, 0);
     // Use the current person's buffer as the spending budget
     const spendBudget = profiles[currentPerson].find(i => i.isBuffer)?.amt || 0;
-
+ 
     // Days
     const today      = new Date();
     const daysLeft   = nextPayDateObj ? Math.max(0, Math.ceil((nextPayDateObj - today) / 86400000)) : 14;
@@ -911,13 +1274,13 @@ function analyseData() {
     const projected  = totalSpent + (dailyBurn * daysLeft);
     const remaining  = spendBudget - totalSpent;
     const projectedEnd = spendBudget - projected;
-
+ 
     const spendPct = Math.min(100, spendBudget > 0 ? (totalSpent / spendBudget) * 100 : 0);
     const timePct  = Math.min(100, (daysElapsed / 14) * 100);
-
+ 
     // Colour helpers
     const overPace = spendPct > timePct + 10;
-
+ 
     // ── Summary
     document.getElementById('tile-budget').textContent    = fmt(spendBudget);
     document.getElementById('tile-spent').textContent     = fmt(totalSpent);
@@ -925,24 +1288,24 @@ function analyseData() {
     document.getElementById('tile-days').textContent      = `${daysLeft} days`;
     document.getElementById('tile-daily').textContent     = fmt(dailyBurn) + ' / day';
     document.getElementById('tile-projected').textContent = fmt(Math.abs(projectedEnd));
-
+ 
     // Colour the key numbers
     document.getElementById('tile-spent').className     = 's-value ' + (overPace ? 'amber' : 'green');
     document.getElementById('tile-remaining').className = 's-value ' + (remaining < 0 ? 'red' : remaining < 80 ? 'amber' : 'green');
     document.getElementById('tile-projected').className = 's-value ' + (projectedEnd < 0 ? 'red' : projectedEnd < 50 ? 'amber' : 'green');
-
+ 
     // ── Pace
     document.getElementById('pace-section').style.display = 'block';
-
+ 
     const spendFill = document.getElementById('pace-fill');
     spendFill.style.width = spendPct + '%';
     spendFill.className = 'pace-bar-fill spend' +
         (spendPct > timePct + 20 ? ' over' : spendPct > timePct + 5 ? ' warn' : '');
-
+ 
     document.getElementById('pace-time-fill').style.width = timePct + '%';
     document.getElementById('pace-spend-pct').textContent = spendPct.toFixed(0) + '%';
     document.getElementById('pace-time-pct').textContent  = timePct.toFixed(0) + '%';
-
+ 
     const verdict = document.getElementById('pace-verdict');
     const gap = spendPct - timePct;
     if (gap > 20) {
@@ -958,7 +1321,7 @@ function analyseData() {
         verdict.className = 'pace-verdict good';
         verdict.textContent = `On track — spending matches time elapsed`;
     }
-
+ 
     // ── Snowflake
     const sfBlock = document.getElementById('snowflake-block');
     if (projectedEnd > 50) {
@@ -970,7 +1333,7 @@ function analyseData() {
     } else {
         sfBlock.style.display = 'none';
     }
-
+ 
     // ── Transactions list
     const txnBlock = document.getElementById('txn-block');
     const txnList  = document.getElementById('txn-list');
@@ -983,28 +1346,28 @@ function analyseData() {
                 <span class="txn-amt">${fmt(t.amount)}</span>
             </div>`).join('');
     }
-
+ 
     setStatus(`${spending.length} spending transactions · ${allTxns.length - spending.length} transfers excluded`);
 }
-
+ 
 function titleCase(str) {
     return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).substring(0, 40);
 }
-
+ 
 function setStatus(msg) {
     document.getElementById('status-msg').textContent = msg;
 }
-
+ 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+ 
 function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
     loadFile(file);
 }
-
+ 
 function loadFile(file) {
     setStatus('Reading ' + file.name + '…');
     if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
@@ -1019,36 +1382,36 @@ function loadFile(file) {
         reader.readAsText(file);
     }
 }
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 async function extractPdfText(file) {
     try {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
+ 
         const MONTHS = {JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',
                         JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12'};
         const year = new Date().getFullYear();
-
+ 
         // ── Collect all text items with position, per page ─────────────────
         // For each page, bucket items into rows by Y (8px tolerance),
         // then within each row record items separately by X so we can
         // distinguish the Description column from the Withdrawals/Deposits columns.
         
         const allRows = []; // [{pageNum, y, leftText, rightItems:[{x,text}]}]
-
+ 
         for (let p = 1; p <= pdf.numPages; p++) {
             const page    = await pdf.getPage(p);
             const vp      = page.getViewport({ scale: 1 });
             const pageW   = vp.width;
             // ANZ Transaction Report: amounts start at roughly 70% of page width
             const splitX  = pageW * 0.68;
-
+ 
             const content = await page.getTextContent();
-
+ 
             // Group into Y-rows (8px bucket)
             const yMap = {};
             for (const item of content.items) {
@@ -1062,7 +1425,7 @@ async function extractPdfText(file) {
                     yMap[yKey].right.push({ x: item.transform[4], text: t.trim() });
                 }
             }
-
+ 
             // Sort Y descending (top of page = highest Y value in PDF space)
             const ys = Object.keys(yMap).map(Number).sort((a, b) => b - a);
             for (const y of ys) {
@@ -1078,11 +1441,11 @@ async function extractPdfText(file) {
                 });
             }
         }
-
+ 
         // ── Rules ──────────────────────────────────────────────────────────
         const DATE_RE   = /^(\d{1,2})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/i;
         const AMT_RE    = /^[\$]?([\d,]+\.\d{2})$/;
-
+ 
         const SKIP_NOISE = [
             /^blank$/i,
             /^(date|transaction details|withdrawals|deposits)$/i,
@@ -1100,7 +1463,7 @@ async function extractPdfText(file) {
             /generated on/i,
             /anz\.com/i,
         ];
-
+ 
         const SKIP_TXNS = [
             /FUNDS TFER/i,
             /M-BANKING.*TRANSFER/i,
@@ -1116,11 +1479,11 @@ async function extractPdfText(file) {
             /ACCOUNT SERVICING/i,
             /DEBIT INTEREST/i,
         ];
-
+ 
         function isNoise(text) { return SKIP_NOISE.some(r => r.test(text.trim())); }
         function isTransfer(text) { return SKIP_TXNS.some(r => r.test(text)); }
         function makeDate(d, m) { return `${String(d).padStart(2,'0')}/${MONTHS[m.toUpperCase()]}/${year}`; }
-
+ 
         // ── Parse rows ─────────────────────────────────────────────────────
         // ANZ Transaction Report structure per transaction:
         //   Row A (leftText): "DD MON  DESCRIPTION..."   rightItems: [{withdrawal $}] or []
@@ -1132,23 +1495,23 @@ async function extractPdfText(file) {
         // We sort rightItems by X: first = withdrawal, last = deposit.
         // If there's only ONE rightItem on a "blank" row → it's a deposit (skip).
         // If there's only ONE rightItem on a date row → it's a withdrawal (spend).
-
+ 
         const csvRows = [];
         let pendingDate = null;
         let pendingDesc = '';
         let prevWasDate = false;
-
+ 
         for (const row of allRows) {
             if (isNoise(row.leftText) && row.rightItems.length === 0) continue;
-
+ 
             const dm = row.leftText.match(DATE_RE);
-
+ 
             if (dm) {
                 // ── New transaction row ──────────────────────────────────
                 pendingDate = makeDate(dm[1], dm[2]);
                 pendingDesc = row.leftText.slice(dm[0].length).trim();
                 prevWasDate = true;
-
+ 
                 // Check for amount in right column
                 if (row.rightItems.length > 0) {
                     // Sort by X: leftmost = withdrawal, rightmost = deposit
@@ -1166,7 +1529,7 @@ async function extractPdfText(file) {
                     pendingDate = null; pendingDesc = ''; prevWasDate = false;
                 }
                 // else: amount will appear on the next "blank" row
-
+ 
             } else if (/^blank$/i.test(row.leftText.trim()) && pendingDate) {
                 // ── Amount row for a deposit (skip) or withdrawal ────────
                 // On "blank" rows, a single amount = deposit (income). Skip it.
@@ -1175,7 +1538,7 @@ async function extractPdfText(file) {
                 // the transaction had no withdrawal — it was a deposit-only row.
                 // Clear pending without emitting.
                 pendingDate = null; pendingDesc = ''; prevWasDate = false;
-
+ 
             } else if (pendingDate && row.rightItems.length > 0 && !dm) {
                 // ── Fallback: amount on a non-blank continuation row ─────
                 const sorted = [...row.rightItems].sort((a, b) => a.x - b.x);
@@ -1187,30 +1550,30 @@ async function extractPdfText(file) {
                     }
                 }
                 pendingDate = null; pendingDesc = ''; prevWasDate = false;
-
+ 
             } else if (pendingDate && row.leftText && !dm) {
                 // Continuation description line
                 if (!isNoise(row.leftText)) pendingDesc += ' ' + row.leftText;
             }
         }
-
+ 
         // ── Output ─────────────────────────────────────────────────────────
         const csv = csvRows.join('\n');
         document.getElementById('paste-area').value = csv;
-
+ 
         if (csvRows.length === 0) {
             setStatus('No spending transactions found in PDF — check that you uploaded the ANZ Transaction Report (not a credit card statement)');
         } else {
             setStatus(`PDF parsed · ${csvRows.length} spending transactions found`);
             analyseData();
         }
-
+ 
     } catch (err) {
         console.error(err);
         setStatus('PDF error: ' + err.message);
     }
 }
-
+ 
 // Drag & drop
 const zone = document.getElementById('upload-zone');
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background = '#f8f8f8'; });
@@ -1221,10 +1584,282 @@ zone.addEventListener('drop', e => {
     const file = e.dataTransfer.files[0];
     if (file) loadFile(file);
 });
-
-// ── Init — restore last selected person from localStorage
+ 
+// ═══════════════════════ THE MARTIN PLAN ═══════════════════════
+ 
+const PLAN_PHASES = [
+    { id:'ph0', cls:'ph0', pill:'Phase 0', title:'Done Today', period:'April 2026' },
+    { id:'ph1', cls:'ph1', pill:'Phase 1', title:'Fix the Structure', period:'May – Oct 2026' },
+    { id:'ph2', cls:'ph2', pill:'Phase 2', title:'Build the Buffer', period:'Oct 2026 – Apr 2027' },
+    { id:'ph3', cls:'ph3', pill:'Phase 3', title:'Grow & Protect', period:'Apr – Oct 2027' },
+    { id:'phM', cls:'phM', pill:'Martin', title:"Martin's Exit", period:'2030 – 2033' },
+];
+ 
+const PLAN_ACTIONS = [
+    // Phase 0
+    { id:'a01', phase:'ph0', num:'A01', badge:'done', badgeTxt:'Done ✓',
+      title:'Apply for TPD & Income Protection insurance',
+      owner:'Julian', deadline:'28 Apr 2026',
+      detail:'TPD $500k + IP $11,000/month applied through ANZ Smart Choice Super / Zurich. 90-day waiting period, 2-year benefit period. Premiums from super balance — zero cash flow impact.',
+      impact:'Critical risk gap closed immediately' },
+    { id:'a02', phase:'ph0', num:'A02', badge:'motion', badgeTxt:'In Motion',
+      title:'Contact mortgage broker — Bluestone IO switch',
+      owner:'Julian', deadline:'28 Apr 2026',
+      detail:'Broker contacted to initiate interest-only variation request with Bluestone on Rhapsody loan ($308,763 @ 7.49%). Target: IO approval within 30 days. If approved saves ~$203/fn.',
+      impact:'~$203/fn cash flow improvement' },
+    // Phase 1
+    { id:'a03', phase:'ph1', num:'A03', badge:'week', badgeTxt:'This Week',
+      title:'Confirm ANZ Super insurance application is active',
+      owner:'Julian', deadline:'5 May 2026',
+      detail:'Log in to ANZ Smart Choice Super portal and confirm TPD and IP cover is confirmed active. Note exact monthly premium being deducted from super balance.',
+      impact:'Verify insurance protection is live' },
+    { id:'a04', phase:'ph1', num:'A04', badge:'upcoming', badgeTxt:'Month 1',
+      title:'Get standalone IP insurance quote (30-day wait)',
+      owner:'Julian', deadline:'31 May 2026',
+      detail:'Contact insurance broker for standalone income protection: 30-day waiting period, 5-year benefit period, 75% salary ($11,188/month). Compare TAL, AIA, MLC, Zurich. Premiums are tax-deductible outside super.',
+      impact:'Reduces waiting period from 90 to 30 days' },
+    { id:'a05', phase:'ph1', num:'A05', badge:'upcoming', badgeTxt:'Month 1',
+      title:'Confirm Bluestone IO switch outcome',
+      owner:'Julian + Broker', deadline:'31 May 2026',
+      detail:'Chase broker for Bluestone IO variation result. If approved: repayment drops from $1,168/fn to ~$965/fn. If refused: activate contingency — ME Bank cross-securitisation or Scenario C (sell).',
+      impact:'$203/fn saving — core lever of the plan' },
+    { id:'a06', phase:'ph1', num:'A06', badge:'upcoming', badgeTxt:'Month 1–2',
+      title:'Switch Rhapsody to long-term tenancy',
+      owner:'Julian + Laura', deadline:'30 Jun 2026',
+      detail:'Engage Robina property manager to transition from short-stay resort pool to long-term residential tenancy. Target rent: $550/week, 8.5% management fee. Net: ~$1,006/fn. Do not transition until buffer reaches $5k minimum.',
+      impact:'Eliminates 46% resort fee · Stable income' },
+    { id:'a07', phase:'ph1', num:'A07', badge:'upcoming', badgeTxt:'Month 2',
+      title:'Obtain landlord insurance for Rhapsody',
+      owner:'Julian', deadline:'30 Jun 2026',
+      detail:'Before first long-term tenant: comprehensive landlord insurance covering loss of rent, damage, public liability. Est. $1,200–$1,500/year. Tax-deductible. Compare NRMA, Terri Scheer, EBM RentCover.',
+      impact:'Covers $15–20k major repair risk' },
+    { id:'a08', phase:'ph1', num:'A08', badge:'upcoming', badgeTxt:'Months 1–6',
+      title:'Build emergency buffer — target $10k by Oct 2026',
+      owner:'Julian + Laura', deadline:'31 Oct 2026',
+      detail:'Direct all freed cash flow from IO switch and tenancy transition into a dedicated high-interest savings account. Do not increase discretionary spend until $10k is reached. Suggested: ME Bank iSaver or ING Savings Maximiser.',
+      impact:'Minimum safety net — enables tenancy switch' },
+    { id:'a09', phase:'ph1', num:'A09', badge:'upcoming', badgeTxt:'Month 3',
+      title:'Get Rhapsody depreciation schedule (Quantity Surveyor)',
+      owner:'Julian', deadline:'31 Jul 2026',
+      detail:'Engage a QS to prepare an ATO-compliant depreciation schedule. Cost ~$700. Estimated deductions: $3,000–$5,000/year on a 2024 apartment. At 30% marginal rate: $900–$1,500/year additional tax refund. Providers: BMT, Washington Brown.',
+      impact:'$900–$1,500/yr additional tax refund' },
+    { id:'a10', phase:'ph1', num:'A10', badge:'upcoming', badgeTxt:'Month 4',
+      title:'File FY2026 tax return — include all Rhapsody deductions',
+      owner:'Julian + Accountant', deadline:'31 Oct 2026',
+      detail:'Engage investment property tax accountant. Deductibles: mortgage interest $23,100, body corp $6,329, rates $3,770, management fees, insurance, depreciation schedule. Estimated total deductions $36,000+. Tax refund ~$10,800. Direct refund to buffer.',
+      impact:'~$10,800 tax refund accelerates buffer' },
+    // Phase 2
+    { id:'a11', phase:'ph2', num:'A11', badge:'upcoming', badgeTxt:'Month 7',
+      title:'Replace ANZ Super IP with standalone policy',
+      owner:'Julian', deadline:'31 Oct 2026',
+      detail:'Once standalone IP policy (30-day wait) is confirmed active, cancel the ANZ Super IP cover to preserve super balance. Keep TPD and death cover in super — cost-effective there. Add standalone IP premium to Mission Control checklist.',
+      impact:'30-day wait vs 90-day · Better policy terms' },
+    { id:'a12', phase:'ph2', num:'A12', badge:'upcoming', badgeTxt:'Months 7–12',
+      title:'Continue building buffer — target $20k by Apr 2027',
+      owner:'Julian + Laura', deadline:'30 Apr 2027',
+      detail:'Tax refund (~$10,800) plus freed cash flow (~$500/fn) accelerates buffer significantly. Target $20k by April 2027. Do not redirect any surplus to mortgage offset until $30k target is fully reached.',
+      impact:'Builds toward stress-tested $30k target' },
+    { id:'a13', phase:'ph2', num:'A13', badge:'upcoming', badgeTxt:'Month 8',
+      title:'Negotiate Bluestone rate reduction',
+      owner:'Julian + Broker', deadline:'30 Nov 2026',
+      detail:'Once IO is confirmed and tenancy stable, ask broker to negotiate rate reduction with Bluestone. Basis: clean repayment history, LVR 57.7%, strong household income. Target: 0.25–0.5% reduction. Saving: $40–$80/fn.',
+      impact:'Additional $40–$80/fn cash flow' },
+    { id:'a14', phase:'ph2', num:'A14', badge:'upcoming', badgeTxt:'Month 9',
+      title:'Laura super review — consolidate & check for lost super',
+      owner:'Laura', deadline:'31 Jan 2027',
+      detail:'Check ATO myGov for lost or unclaimed super accounts. Consolidate any old accounts to avoid duplicate fees. Review investment option within existing fund — consider switching from default to higher-growth given working years remaining.',
+      impact:'Closes super gap · Reduces fees' },
+    // Phase 3
+    { id:'a15', phase:'ph3', num:'A15', badge:'upcoming', badgeTxt:'Months 13–18',
+      title:'Complete $30k buffer — redirect surplus to Stadium Drive offset',
+      owner:'Julian + Laura', deadline:'31 Oct 2027',
+      detail:'Once buffer reaches $30,000, redirect freed monthly cash (~$1,400/month) to ME Bank Stadium Drive offset account at 5.49%. Every $10k in offset saves $549/year in interest. This compounds as offset balance grows.',
+      impact:'$1,647+/yr interest saving — compounds' },
+    { id:'a16', phase:'ph3', num:'A16', badge:'upcoming', badgeTxt:'Month 13',
+      title:'Begin salary sacrifice — Julian $500/fn into super',
+      owner:'Julian + CDSB HR', deadline:'30 Apr 2027',
+      detail:'Contact CDSB HR/payroll to arrange salary sacrifice of $500/fn ($13,000/yr) into ANZ Super. Net cost after tax saving: ~$350/fn. Saves 15% net (30% marginal rate minus 15% contributions tax). Reduces taxable income by $13,000. Only start once $30k buffer is confirmed.',
+      impact:'$3,900/yr tax saving · Closes retirement gap' },
+    { id:'a17', phase:'ph3', num:'A17', badge:'upcoming', badgeTxt:'Month 18',
+      title:'Annual plan review — April 2027',
+      owner:'Julian + Laura', deadline:'30 Apr 2027',
+      detail:'Formal annual review: buffer balance, Rhapsody IO position, tenancy status, super balances, share portfolio, net worth vs targets. Update Martin exit timeline based on property value. Consider engaging a registered CFP financial adviser for this review.',
+      impact:'Keeps plan on track · Identifies new opportunities' },
+    // Martin
+    { id:'a18', phase:'phM', num:'A18', badge:'martin', badgeTxt:'2030–2033',
+      title:"Martin exit planning — Rhapsody sale & wealth transfer",
+      owner:'Julian + Laura + Accountant', deadline:'2030–2033',
+      detail:"When Martin reaches 18–21: engage tax accountant to model CGT liability. Consider timing sale to a year when Martin has minimal income (student) for CGT efficiency. Target net to Martin: $430k–$590k. Options: cash gift, property transfer, or retain as Martin's first home.",
+      impact:'$430k–$590k for Martin\'s home deposit' },
+];
+ 
+function planKey(id) { return 'plan_' + id; }
+function getPlanDone(id) { return localStorage.getItem(planKey(id)) === 'true'; }
+function setPlanDone(id, v) { localStorage.setItem(planKey(id), v); }
+ 
+function deadlineClass(deadlineStr, done) {
+    if (done) return '';
+    if (/^\d{4}/.test(deadlineStr)) return ''; // year-range like 2030–2033
+    const parts = deadlineStr.split(' ');
+    if (parts.length < 3) return '';
+    const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const m = months[parts[1]];
+    const y = parseInt(parts[2]);
+    if (isNaN(m) || isNaN(y)) return '';
+    const d = parseInt(parts[0]);
+    const deadline = new Date(y, m, d);
+    const today = new Date();
+    const diff = Math.ceil((deadline - today) / 86400000);
+    if (diff < 0)  return 'overdue';
+    if (diff <= 14) return 'urgent';
+    return '';
+}
+ 
+function renderPlan() {
+    const container = document.getElementById('plan-container');
+    container.innerHTML = '';
+ 
+    const totalActions = PLAN_ACTIONS.length;
+    const doneCount = PLAN_ACTIONS.filter(a => getPlanDone(a.id)).length;
+    const pct = Math.round((doneCount / totalActions) * 100);
+ 
+    // Update progress header
+    document.getElementById('plan-count').textContent = `${doneCount} of ${totalActions} complete`;
+    document.getElementById('plan-progress-fill').style.width = pct + '%';
+    document.getElementById('plan-progress-sub').textContent =
+        pct === 0 ? 'Plan approved — ready to execute' :
+        pct === 100 ? '🎉 All actions complete' :
+        `${pct}% complete · ${totalActions - doneCount} actions remaining`;
+ 
+    // Net worth block
+    const nwBlock = document.createElement('div');
+    nwBlock.className = 'plan-nw-block';
+    nwBlock.innerHTML = `
+        <div>
+            <div class="plan-nw-label">Family Net Worth Today</div>
+            <div class="plan-nw-target">Target by Oct 2027: ~$1.1M+</div>
+        </div>
+        <div style="text-align:right">
+            <div class="plan-nw-val">~$981,588</div>
+            <div class="plan-nw-target">Martin target: ~$508k at age 21</div>
+        </div>`;
+    container.appendChild(nwBlock);
+ 
+    // Render each phase
+    PLAN_PHASES.forEach(phase => {
+        const phaseActions = PLAN_ACTIONS.filter(a => a.phase === phase.id);
+        const phaseDone = phaseActions.filter(a => getPlanDone(a.id)).length;
+ 
+        const phaseEl = document.createElement('div');
+        phaseEl.className = 'plan-phase';
+ 
+        // Phase header
+        phaseEl.innerHTML = `
+            <div class="plan-phase-header ${phase.cls}">
+                <span class="plan-phase-pill">${phase.pill}</span>
+                <span class="plan-phase-title">${phase.title}</span>
+                <span class="plan-phase-period">${phase.period}</span>
+                <span class="plan-phase-prog">${phaseDone}/${phaseActions.length}</span>
+            </div>`;
+ 
+        // Action cards
+        phaseActions.forEach(action => {
+            const done = getPlanDone(action.id);
+            const dlClass = deadlineClass(action.deadline, done);
+ 
+            const card = document.createElement('div');
+            card.className = 'plan-action' + (done ? ' done' : '');
+            card.dataset.id = action.id;
+ 
+            card.innerHTML = `
+                <input type="checkbox" ${done ? 'checked' : ''}
+                    onchange="togglePlanAction(this, '${action.id}')">
+                <div class="plan-action-body" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div class="plan-action-top">
+                        <span class="plan-action-num">${action.num}</span>
+                        <span class="plan-action-title">${action.title}</span>
+                        <span class="plan-action-badge badge-${action.badge}">${action.badgeTxt}</span>
+                    </div>
+                    <div class="plan-action-meta">
+                        <span class="plan-action-owner">${action.owner}</span>
+                        <span class="plan-action-deadline ${dlClass}">${action.deadline}${dlClass === 'urgent' ? ' ⚡' : dlClass === 'overdue' ? ' !' : ''}</span>
+                    </div>
+                    <div class="plan-action-detail">
+                        ${action.detail}
+                        <div class="plan-action-impact">→ ${action.impact}</div>
+                    </div>
+                </div>`;
+ 
+            phaseEl.appendChild(card);
+        });
+ 
+        container.appendChild(phaseEl);
+    });
+}
+ 
+function togglePlanAction(cb, id) {
+    setPlanDone(id, cb.checked);
+    const card = cb.closest('.plan-action');
+    card.classList.toggle('done', cb.checked);
+    // Update progress without full re-render
+    const doneCount = PLAN_ACTIONS.filter(a => getPlanDone(a.id)).length;
+    const pct = Math.round((doneCount / PLAN_ACTIONS.length) * 100);
+    document.getElementById('plan-count').textContent = `${doneCount} of ${PLAN_ACTIONS.length} complete`;
+    document.getElementById('plan-progress-fill').style.width = pct + '%';
+    document.getElementById('plan-progress-sub').textContent =
+        pct === 0 ? 'Plan approved — ready to execute' :
+        pct === 100 ? '🎉 All actions complete' :
+        `${pct}% complete · ${PLAN_ACTIONS.length - doneCount} actions remaining`;
+    // Re-render phase progress counts
+    PLAN_PHASES.forEach(phase => {
+        const phaseActions = PLAN_ACTIONS.filter(a => a.phase === phase.id);
+        const phaseDone = phaseActions.filter(a => getPlanDone(a.id)).length;
+        const headers = document.querySelectorAll('.plan-phase-prog');
+        // Find matching header by iterating plan phases
+    });
+    // Simple: update all phase prog counts
+    document.querySelectorAll('.plan-phase').forEach((phEl, i) => {
+        const phase = PLAN_PHASES[i];
+        const phaseActions = PLAN_ACTIONS.filter(a => a.phase === phase.id);
+        const phaseDone = phaseActions.filter(a => getPlanDone(a.id)).length;
+        const progEl = phEl.querySelector('.plan-phase-prog');
+        if (progEl) progEl.textContent = `${phaseDone}/${phaseActions.length}`;
+    });
+}
+ 
+ 
 const savedPerson = localStorage.getItem('mc_person') || 'julian';
 loadProfile(savedPerson);
+ 
+// Pre-mark actions completed today (only on first load)
+if (localStorage.getItem('plan_init') !== '1') {
+    setPlanDone('a01', true);
+    setPlanDone('a02', true);
+    localStorage.setItem('plan_init', '1');
+}
 </script>
+ 
+<!-- ════ BOTTOM NAV ════ -->
+<nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-checklist" onclick="switchTab('checklist')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        </svg>
+        Checklist
+    </button>
+    <button class="nav-btn" id="nav-datalab" onclick="switchTab('datalab')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+        </svg>
+        Data Lab
+    </button>
+    <button class="nav-btn" id="nav-plan" onclick="switchTab('plan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+        </svg>
+        The Plan
+    </button>
+</nav>
+ 
 </body>
 </html>
