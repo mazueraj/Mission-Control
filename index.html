@@ -545,6 +545,90 @@
             margin: 18px 0;
         }
  
+        /* ── DATE RANGE FILTER ── */
+        .date-filter {
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+ 
+        .date-filter-label {
+            font-size: 0.68em;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+ 
+        .date-filter-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+ 
+        .date-filter-field {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+ 
+        .date-filter-field label {
+            font-size: 0.7em;
+            color: var(--muted);
+            font-weight: 500;
+        }
+ 
+        .date-filter-field input[type="date"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: var(--mono);
+            /* Must be ≥16px to prevent iOS/Android zoom */
+            font-size: 16px;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-appearance: none;
+        }
+ 
+        .date-filter-field input[type="date"]:focus {
+            outline: none;
+            border-color: var(--text);
+        }
+ 
+        .date-filter-reset {
+            padding: 8px 14px;
+            background: var(--border);
+            border: none;
+            border-radius: 6px;
+            font-family: var(--body);
+            font-size: 0.82em;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            white-space: nowrap;
+            min-height: var(--tap);
+            touch-action: manipulation;
+            align-self: flex-end;
+        }
+ 
+        .date-filter-reset:active { opacity: 0.7; }
+ 
+        .date-filter-info {
+            margin-top: 8px;
+            font-size: 0.72em;
+            color: var(--muted);
+            font-family: var(--mono);
+            line-height: 1.4;
+        }
+ 
+        .date-filter-info.warn { color: var(--amber); }
+        .date-filter-info.ok   { color: var(--green); }
+ 
         /* ── PANEL ── */
         .panel { display: none; }
         .panel.active { display: block; }
@@ -1016,6 +1100,23 @@
                 placeholder="Or paste rows here:&#10;24/04/2026,COLES ROBINA,-95.00&#10;23/04/2026,KFC ROBINA,-33.90"
             ></textarea>
  
+            <!-- Date range filter -->
+            <div class="date-filter" id="date-filter" style="display:none">
+                <div class="date-filter-label">Filter to pay cycle</div>
+                <div class="date-filter-row">
+                    <div class="date-filter-field">
+                        <label>From</label>
+                        <input type="date" id="filter-from" onchange="analyseData()">
+                    </div>
+                    <div class="date-filter-field">
+                        <label>To</label>
+                        <input type="date" id="filter-to" onchange="analyseData()">
+                    </div>
+                    <button class="date-filter-reset" onclick="resetDateFilter()">All</button>
+                </div>
+                <div class="date-filter-info" id="date-filter-info"></div>
+            </div>
+ 
             <button class="analyse-btn" onclick="analyseData()">Analyse</button>
             <div class="status-msg" id="status-msg">No data loaded</div>
         </div>
@@ -1260,6 +1361,28 @@ function parseTransactions(raw) {
     return txns;
 }
  
+function parseDate(str) {
+    // Handles DD/MM/YYYY and YYYY-MM-DD
+    if (!str) return null;
+    const a = str.split('/');
+    if (a.length === 3) return new Date(+a[2], +a[1]-1, +a[0]);
+    const b = str.split('-');
+    if (b.length === 3) return new Date(+b[0], +b[1]-1, +b[2]);
+    return null;
+}
+ 
+function toInputDate(d) {
+    // Returns YYYY-MM-DD for <input type="date">
+    if (!d) return '';
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+ 
+function resetDateFilter() {
+    document.getElementById('filter-from').value = '';
+    document.getElementById('filter-to').value = '';
+    analyseData();
+}
+ 
 function analyseData() {
     const raw = document.getElementById('paste-area').value.trim();
     if (!raw) {
@@ -1273,29 +1396,120 @@ function analyseData() {
         return;
     }
  
-    // Only genuine spending: debits that are NOT internal transfers
-    const spending = allTxns.filter(t => t.isDebit && !isTransfer(t.desc));
+    // ── Only genuine spending debits ──────────────────────────────────────
+    const allSpending = allTxns.filter(t => t.isDebit && !isTransfer(t.desc));
  
-    const totalSpent  = spending.reduce((s, t) => s + t.amount, 0);
-    // Use the current person's buffer as the spending budget
-    const spendBudget = profiles[currentPerson].find(i => i.isBuffer)?.amt || 0;
+    // ── Detect statement date range from parsed transactions ──────────────
+    const txnDates = allTxns
+        .map(t => parseDate(t.date))
+        .filter(Boolean)
+        .sort((a, b) => a - b);
  
-    // Days
-    const today      = new Date();
-    const daysLeft   = nextPayDateObj ? Math.max(0, Math.ceil((nextPayDateObj - today) / 86400000)) : 14;
-    const daysElapsed = 14 - daysLeft;
-    const dailyBurn  = daysElapsed > 0 ? totalSpent / daysElapsed : 0;
-    const projected  = totalSpent + (dailyBurn * daysLeft);
-    const remaining  = spendBudget - totalSpent;
+    const statementStart = txnDates[0];
+    const statementEnd   = txnDates[txnDates.length - 1];
+    const statementDays  = statementStart && statementEnd
+        ? Math.round((statementEnd - statementStart) / 86400000) + 1
+        : 14;
+ 
+    // ── Show date filter once data is loaded ─────────────────────────────
+    const filterEl = document.getElementById('date-filter');
+    filterEl.style.display = 'block';
+ 
+    // Pre-populate date filter fields with detected statement range
+    // (only if not already set by user)
+    const fromInput = document.getElementById('filter-from');
+    const toInput   = document.getElementById('filter-to');
+ 
+    if (!fromInput.value && !toInput.value && statementStart && statementEnd) {
+        // Default: show the most recent fortnightly cycle within the statement
+        // Find the pay date that falls within the statement period
+        let cycleEnd = nextPayDateObj ? new Date(nextPayDateObj) : new Date();
+        // Step back to find the last pay date before or on statement end
+        while (cycleEnd > statementEnd) cycleEnd.setDate(cycleEnd.getDate() - 14);
+        const cycleStart = new Date(cycleEnd);
+        cycleStart.setDate(cycleStart.getDate() - 13); // 14-day cycle inclusive
+ 
+        // Only use cycle dates if they fall within the statement
+        if (cycleStart >= statementStart && cycleEnd <= statementEnd) {
+            fromInput.value = toInputDate(cycleStart);
+            toInput.value   = toInputDate(cycleEnd);
+        } else {
+            // Fall back to full statement range
+            fromInput.value = toInputDate(statementStart);
+            toInput.value   = toInputDate(statementEnd);
+        }
+    }
+ 
+    // ── Apply date filter ─────────────────────────────────────────────────
+    const filterFrom = parseDate(fromInput.value.split('-').reverse().join('/')) ||
+                       (fromInput.value ? new Date(fromInput.value) : null);
+    const filterTo   = parseDate(toInput.value.split('-').reverse().join('/')) ||
+                       (toInput.value   ? new Date(toInput.value)   : null);
+ 
+    // Convert YYYY-MM-DD input value correctly
+    const fromDate = fromInput.value ? new Date(fromInput.value + 'T00:00:00') : null;
+    const toDate   = toInput.value   ? new Date(toInput.value   + 'T23:59:59') : null;
+ 
+    const spending = allSpending.filter(t => {
+        if (!fromDate && !toDate) return true;
+        const d = parseDate(t.date);
+        if (!d) return true;
+        if (fromDate && d < fromDate) return false;
+        if (toDate   && d > toDate)   return false;
+        return true;
+    });
+ 
+    // ── Calculate actual days in the filtered range ───────────────────────
+    const filteredDays = fromDate && toDate
+        ? Math.round((toDate - fromDate) / 86400000) + 1
+        : statementDays;
+ 
+    // Scale budget to match the filtered date range
+    // Budget is fortnightly (14 days) — scale proportionally
+    const fnBudget    = profiles[currentPerson].find(i => i.isBuffer)?.amt || 0;
+    const scaledBudget = fnBudget * (filteredDays / 14);
+ 
+    // Update date filter info
+    const infoEl = document.getElementById('date-filter-info');
+    const budgetMultiple = (filteredDays / 14).toFixed(2);
+    if (statementDays > 14 && filteredDays >= statementDays) {
+        infoEl.textContent = `⚠ Statement spans ${statementDays} days (${budgetMultiple} fortnights). Budget scaled to ${fmt(scaledBudget)}. Use date filter to isolate one cycle.`;
+        infoEl.className = 'date-filter-info warn';
+    } else if (fromDate && toDate) {
+        infoEl.textContent = `✓ Showing ${filteredDays} days · ${spending.length} transactions · Budget scaled to ${fmt(scaledBudget)}`;
+        infoEl.className = 'date-filter-info ok';
+    } else {
+        infoEl.textContent = '';
+    }
+ 
+    const totalSpent = spending.reduce((s, t) => s + t.amount, 0);
+    const spendBudget = scaledBudget;
+ 
+    // ── Days remaining in the FILTERED period ─────────────────────────────
+    const today = new Date();
+    let daysLeft, daysElapsed;
+    if (toDate && toDate >= today) {
+        daysLeft    = Math.max(0, Math.ceil((toDate - today) / 86400000));
+        daysElapsed = filteredDays - daysLeft;
+    } else if (toDate && toDate < today) {
+        // Period already ended — show as complete
+        daysLeft    = 0;
+        daysElapsed = filteredDays;
+    } else {
+        daysLeft    = nextPayDateObj ? Math.max(0, Math.ceil((nextPayDateObj - today) / 86400000)) : 14;
+        daysElapsed = 14 - daysLeft;
+    }
+ 
+    const dailyBurn    = daysElapsed > 0 ? totalSpent / daysElapsed : 0;
+    const projected    = totalSpent + (dailyBurn * daysLeft);
+    const remaining    = spendBudget - totalSpent;
     const projectedEnd = spendBudget - projected;
  
     const spendPct = Math.min(100, spendBudget > 0 ? (totalSpent / spendBudget) * 100 : 0);
-    const timePct  = Math.min(100, (daysElapsed / 14) * 100);
- 
-    // Colour helpers
+    const timePct  = Math.min(100, filteredDays > 0 ? (daysElapsed / filteredDays) * 100 : 0);
     const overPace = spendPct > timePct + 10;
  
-    // ── Summary
+    // ── Summary tiles ─────────────────────────────────────────────────────
     document.getElementById('tile-budget').textContent    = fmt(spendBudget);
     document.getElementById('tile-spent').textContent     = fmt(totalSpent);
     document.getElementById('tile-remaining').textContent = fmt(remaining);
@@ -1303,7 +1517,6 @@ function analyseData() {
     document.getElementById('tile-daily').textContent     = fmt(dailyBurn) + ' / day';
     document.getElementById('tile-projected').textContent = fmt(Math.abs(projectedEnd));
  
-    // Colour the key numbers
     document.getElementById('tile-spent').className     = 's-value ' + (overPace ? 'amber' : 'green');
     document.getElementById('tile-remaining').className = 's-value ' + (remaining < 0 ? 'red' : remaining < 80 ? 'amber' : 'green');
     document.getElementById('tile-projected').className = 's-value ' + (projectedEnd < 0 ? 'red' : projectedEnd < 50 ? 'amber' : 'green');
@@ -1361,7 +1574,7 @@ function analyseData() {
             </div>`).join('');
     }
  
-    setStatus(`${spending.length} spending transactions · ${allTxns.length - spending.length} transfers excluded`);
+    setStatus(`${spending.length} transactions in range · ${allTxns.length - allSpending.length - (allSpending.length - spending.length)} transfers excluded${spending.length < allSpending.length ? ` · ${allSpending.length - spending.length} outside filter` : ''}`);
 }
  
 function titleCase(str) {
@@ -1384,6 +1597,10 @@ function handleFile(e) {
  
 function loadFile(file) {
     setStatus('Reading ' + file.name + '…');
+    // Reset date filter so it re-detects range from new data
+    document.getElementById('filter-from').value = '';
+    document.getElementById('filter-to').value   = '';
+    document.getElementById('date-filter').style.display = 'none';
     if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
         extractPdfText(file);
     } else {
@@ -1612,10 +1829,10 @@ const PLAN_PHASES = [
 const PLAN_ACTIONS = [
     // Phase 0
     { id:'a01', phase:'ph0', num:'A01', badge:'done', badgeTxt:'Done ✓',
-      title:'Apply for TPD & Income Protection insurance',
+      title:'Insurance position confirmed & gaps closed',
       owner:'Julian', deadline:'28 Apr 2026',
-      detail:'TPD $500k + IP $11,000/month applied through ANZ Smart Choice Super / Zurich. 90-day waiting period, 2-year benefit period. Premiums from super balance — zero cash flow impact.',
-      impact:'Critical risk gap closed immediately' },
+      detail:'EXISTING: Aussie MPP (Policy 239112, since Apr 2017) — Julian death $139k + living $42k, Laura death $70k + living $21k. Cost $44.44/month from ANZ account. NEW (applied 28 Apr): ANZ Super/Zurich — Julian TPD $500k + IP $11,000/month. Combined Julian death cover: $439k. IP gap still open — standalone policy needed.',
+      impact:'Most critical gaps closed · MPP review needed' },
     { id:'a02', phase:'ph0', num:'A02', badge:'motion', badgeTxt:'In Motion',
       title:'Contact mortgage broker — Bluestone IO switch',
       owner:'Julian', deadline:'28 Apr 2026',
@@ -1623,15 +1840,20 @@ const PLAN_ACTIONS = [
       impact:'~$203/fn cash flow improvement' },
     // Phase 1
     { id:'a03', phase:'ph1', num:'A03', badge:'week', badgeTxt:'This Week',
-      title:'Confirm ANZ Super insurance application is active',
+      title:'Confirm ANZ Super TPD & IP cover is active',
       owner:'Julian', deadline:'5 May 2026',
-      detail:'Log in to ANZ Smart Choice Super portal and confirm TPD and IP cover is confirmed active. Note exact monthly premium being deducted from super balance.',
-      impact:'Verify insurance protection is live' },
+      detail:'Log in to ANZ Smart Choice Super and confirm TPD $500k and IP $11,000/month are active. Note exact monthly premium deducted from super balance. Cross-check against Aussie MPP to identify any coverage overlaps worth rationalising.',
+      impact:'Verify full insurance position is live' },
+    { id:'a03b', phase:'ph1', num:'A03b', badge:'week', badgeTxt:'This Week',
+      title:'Email ALI Group — MPP review & increased cover quotes',
+      owner:'Julian + Laura', deadline:'15 May 2026',
+      detail:'Email drafted and ready to send to service@aligroup.com.au. Requesting: (1) pre-existing condition exclusions in writing for both Julian and Laura, (2) Living Benefit trigger conditions, (3) address update to 33/42 Stadium Drive Robina, (4) quotes for Julian death $500k + living $150k + IP, Laura death $300k + living $90k, (5) whether cover can increase without new medical evidence. Policy 239112.',
+      impact:'Understand existing cover · Get appropriate coverage quotes' },
     { id:'a04', phase:'ph1', num:'A04', badge:'upcoming', badgeTxt:'Month 1',
       title:'Get standalone IP insurance quote (30-day wait)',
       owner:'Julian', deadline:'31 May 2026',
-      detail:'Contact insurance broker for standalone income protection: 30-day waiting period, 5-year benefit period, 75% salary ($11,188/month). Compare TAL, AIA, MLC, Zurich. Premiums are tax-deductible outside super.',
-      impact:'Reduces waiting period from 90 to 30 days' },
+      detail:'Contact insurance broker for standalone income protection: 30-day waiting period, 5-year benefit period, 75% salary ($11,188/month). Compare TAL, AIA, MLC, Zurich. Premiums are tax-deductible outside super. Once active, cancel the ANZ Super IP (90-day wait) to stop super erosion.',
+      impact:'Reduces IP waiting period from 90 to 30 days' },
     { id:'a05', phase:'ph1', num:'A05', badge:'upcoming', badgeTxt:'Month 1',
       title:'Confirm Bluestone IO switch outcome',
       owner:'Julian + Broker', deadline:'31 May 2026',
@@ -1755,7 +1977,7 @@ function renderPlan() {
         </div>
         <div style="text-align:right">
             <div class="plan-nw-val">~$981,588</div>
-            <div class="plan-nw-target">Martin target: ~$508k at age 21</div>
+            <div class="plan-nw-target">Insurance: MPP + ANZ Super + standalone IP pending</div>
         </div>`;
     container.appendChild(nwBlock);
  
