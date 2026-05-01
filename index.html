@@ -218,6 +218,9 @@
         .checked .item-name { text-decoration: line-through; }
 
         .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 0.63em;
             font-weight: 600;
             letter-spacing: 2px;
@@ -229,6 +232,27 @@
         }
 
         .group-header:first-child { padding-top: 0; }
+
+        .checklist-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0 6px;
+        }
+
+        .checklist-summary-label {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checklist-summary-amt {
+            font-family: var(--mono);
+            font-size: 1.05em;
+            font-weight: 700;
+        }
 
         .buffer-row {
             padding: 14px 0;
@@ -543,6 +567,142 @@
             border: none;
             border-top: 1px solid var(--border);
             margin: 18px 0;
+        }
+
+        .source-tag {
+            display: inline-block;
+            font-size: 0.65em;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .source-S {
+            background: #eff6ff;
+            color: var(--blue);
+        }
+
+        .source-R {
+            background: #fffbeb;
+            color: var(--amber);
+        }
+
+        /* ── RHAPSODY ACTUAL INPUT ── */
+        .rhapsody-actual-input {
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: var(--surface);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .rhapsody-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .rhapsody-field {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .rhapsody-field label {
+            font-size: 0.68em;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .rhapsody-field input {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-appearance: none;
+        }
+
+        .rhapsody-field input:focus {
+            outline: none;
+            border-color: var(--amber);
+        }
+
+        .rhapsody-clear-btn {
+            padding: 7px 12px;
+            background: var(--border);
+            border: none;
+            border-radius: 6px;
+            font-family: var(--body);
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            white-space: nowrap;
+            min-height: 38px;
+            touch-action: manipulation;
+            align-self: flex-end;
+        }
+
+        .rhapsody-clear-btn:active { opacity: 0.7; }
+
+        .rhapsody-variance {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 7px;
+            padding-top: 7px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75em;
+            color: var(--muted);
+        }
+
+        /* ── SPLIT FUNDING BAR ── */
+        .split-bar-wrap {
+            margin-top: 5px;
+            margin-bottom: 2px;
+        }
+
+        .split-bar {
+            display: flex;
+            height: 5px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            gap: 1px;
+        }
+
+        .split-bar-r {
+            background: var(--amber);
+            border-radius: 3px 0 0 3px;
+            transition: width 0.4s ease;
+        }
+
+        .split-bar-s {
+            background: var(--blue);
+            border-radius: 0 3px 3px 0;
+            transition: width 0.4s ease;
+        }
+
+        .split-labels {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .split-plus {
+            font-size: 0.7em;
+            color: var(--muted);
+            font-weight: 600;
         }
 
         /* ── DATE RANGE FILTER ── */
@@ -1139,64 +1299,64 @@ const baseDates = {
 const profiles = {
     julian: [
         // ── Online Mortgage ──────────────────────────────────────────────
-        { id:"j1",  action:"Mortgage & Fixed Bills",        amt:1965.38, target:"Online Mortgage",        note:"Fixed bundle (ME Bank, Solar, Ins, Travel)" },
-        { id:"j17", action:"Rhapsody Mortgage (Bluestone)", amt:1168.00, target:"Bluestone Mortgage",     note:"BSB: 067953 | Acc: 202449401 | Due by 28th each month" },
+        { id:"j1",  action:"Mortgage & Fixed Bills", amt:1965.38, target:"Online Mortgage", source:"SPLIT", splitAmt:{rhapsody:1005.00, salary:960.38}, note:"ME Bank 5.49% · Rhapsody income covers $1,005/fn · Salary covers remaining $960.38/fn" },
+        { id:"j17", action:"Rhapsody Mortgage (Bluestone)", amt:1078.67, target:"Bluestone Mortgage",     source:"R", note:"BSB: 067953 | Acc: 202449401 | Due by 28th each month · $2,336.46/mth = $1,078.67/fn" },
         // ── Online Saver Transfers ───────────────────────────────────────
-        { id:"j2",  action:"Tennis Coaching",               amt:300.00,  target:"Online Saver Transfers", note:"Weekly sessions budget" },
-        { id:"j4",  action:"Body Corp (Rhapsody)",          amt:243.44,  target:"Online Saver Transfers", note:"BPAY: Biller 96503 | Ref: 246704845" },
-        { id:"j5",  action:"Council Rates (Rhap)",          amt:95.00,   target:"Online Saver Transfers", note:"Provision for rates" },
-        { id:"j6",  action:"Water Rates (Rhap)",            amt:50.00,   target:"Online Saver Transfers", note:"Provision for water" },
-        { id:"j7",  action:"Schooling/Tutoring",            amt:300.00,  target:"Online Saver Transfers", note:"Future fees budget" },
+        { id:"j2",  action:"Tennis Coaching",               amt:300.00,  target:"Online Saver Transfers", source:"S", note:"Weekly sessions budget" },
+        { id:"j4",  action:"Body Corp (Rhapsody)",          amt:243.44,  target:"Online Saver Transfers", source:"R", note:"BPAY: Biller 96503 | Ref: 246704845" },
+        { id:"j5",  action:"Council Rates (Rhap)",          amt:95.00,   target:"Online Saver Transfers", source:"R", note:"Provision for rates" },
+        { id:"j6",  action:"Water Rates (Rhap)",            amt:50.00,   target:"Online Saver Transfers", source:"R", note:"Provision for water" },
+        { id:"j7",  action:"Schooling/Tutoring",            amt:300.00,  target:"Online Saver Transfers", source:"S", note:"Future fees budget" },
         // ── Progress Saver ───────────────────────────────────────────────
-        { id:"j8",  action:"Watch & Emilio Funds",          amt:200.00,  target:"Progress Saver",         note:"$100 Watch | $100 Martin Emilio" },
-        { id:"j9",  action:"Project Snowflake",             amt:441.00,  target:"Progress Saver",         note:"Internal Transfer" },
+        { id:"j8",  action:"Watch & Emilio Funds",          amt:100.00,  target:"Progress Saver",         source:"S", note:"$0 Watch paused | $100 Martin Emilio" },
+        { id:"j9",  action:"Project Snowflake",             amt:200.00,  target:"Progress Saver",         source:"S", note:"Internal Transfer — reduced temporarily" },
         // ── Credit Card (ANZ Rewards) ────────────────────────────────────
-        { id:"j3a", action:"ANZ Rewards CC Payment",        amt:200.00,  target:"Credit Card",            note:"Base credit card payment" },
-        { id:"j3b", action:"Personal Trainer",              amt:140.00,  target:"Credit Card",            note:"Nick Coulstock — billed to CC" },
-        { id:"j12", action:"Google Storage",                amt:19.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
-        { id:"j13", action:"Car Wash & Maintenance",        amt:20.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
-        { id:"j14", action:"EV Charging",                   amt:15.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
-        { id:"j15", action:"Psychology",                    amt:50.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
-        { id:"j16", action:"Basketball & Tennis Regs",      amt:15.00,   target:"Credit Card",            note:"Charged to ANZ Rewards CC" },
+        { id:"j3a", action:"ANZ Rewards CC Payment",        amt:200.00,  target:"Credit Card",            source:"S", note:"Base credit card payment" },
+        { id:"j3b", action:"Personal Trainer",              amt:140.00,  target:"Credit Card",            source:"S", note:"Nick Coulstock — billed to CC" },
+        { id:"j12", action:"Google Storage",                amt:19.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
+        { id:"j13", action:"Car Wash & Maintenance",        amt:20.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
+        { id:"j14", action:"EV Charging",                   amt:15.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
+        { id:"j15", action:"Psychology",                    amt:50.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
+        { id:"j16", action:"Basketball & Tennis Regs",      amt:15.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
         // ── Access Advantage ─────────────────────────────────────────────
-        { id:"j10", action:"Health & Subs",                 amt:85.00,   target:"Access Advantage",       note:"Hold for direct debits" },
-        { id:"j11", action:"REMAINING SPENDING",            amt:394.13,  target:"Access Advantage",       note:"Julian's Buffer — Bluestone mortgage now shown separately above", isBuffer:true }
+        { id:"j10", action:"Health & Subs",                 amt:50.00,   target:"Access Advantage",       source:"S", note:"Hold for direct debits" },
+        { id:"j11", action:"DISCRETIONARY",                 amt:0.00,   target:"Access Advantage",       source:"S", note:"Temporarily zeroed — restore once IO switch confirmed", isBuffer:true }
     ],
     laura: [
         // ── Laura Payments ───────────────────────────────────────────────
-        { id:"l1",  action:"Hillcrest Oli",          amt:500.00,  target:"Laura Payments",          note:"School/Care fees" },
-        { id:"l2",  action:"Flexischools",            amt:34.00,   target:"Laura Payments",          note:"School payments" },
-        { id:"l5",  action:"Medibank",                amt:155.00,  target:"Laura Payments",          note:"Health insurance" },
-        { id:"l22", action:"Swimming Lessons",        amt:55.00,   target:"Laura Payments",          note:"Direct debit" },
+        { id:"l1",  action:"Hillcrest Oli",          amt:500.00,  target:"Laura Payments",          source:"S", note:"School/Care fees" },
+        { id:"l2",  action:"Flexischools",            amt:34.00,   target:"Laura Payments",          source:"S", note:"School payments" },
+        { id:"l5",  action:"Medibank",                amt:155.00,  target:"Laura Payments",          source:"S", note:"Health insurance" },
+        { id:"l22", action:"Swimming Lessons",        amt:55.00,   target:"Laura Payments",          source:"S", note:"Direct debit" },
         // ── ANZ Rewards Plat ─────────────────────────────────────────────
-        { id:"l3",  action:"Groceries",               amt:450.00,  target:"ANZ Rewards Plat",        note:"Household grocery budget" },
+        { id:"l3",  action:"Groceries",               amt:450.00,  target:"ANZ Rewards Plat",        source:"S", note:"Household grocery budget" },
         // ── ANZ Credit Card ──────────────────────────────────────────────
-        { id:"l13", action:"Credit Card",             amt:100.00,  target:"ANZ Credit Card",         note:"Monthly credit card payment" },
+        { id:"l13", action:"Credit Card",             amt:100.00,  target:"ANZ Credit Card",         source:"S", note:"Monthly credit card payment" },
         // ── BPay ─────────────────────────────────────────────────────────
-        { id:"l15", action:"HUMM",                    amt:50.00,   target:"BPay",                    note:"HUMM repayment" },
+        { id:"l15", action:"HUMM",                    amt:50.00,   target:"BPay",                    source:"S", note:"HUMM repayment" },
         // ── Laura Cuenta Colombia ────────────────────────────────────────
-        { id:"l14", action:"Colombia Transfer",       amt:110.00,  target:"Laura Cuenta Colombia",   note:"Transfer to Colombia account" },
+        { id:"l14", action:"Colombia Transfer",       amt:110.00,  target:"Laura Cuenta Colombia",   source:"S", note:"Transfer to Colombia account" },
         // ── Cash ─────────────────────────────────────────────────────────
-        { id:"l8",  action:"Dining & Shopping",       amt:273.15,  target:"Cash",                    note:"$150 Dining + $123 Shopping — adjusted to balance budget" },
+        { id:"l8",  action:"Dining & Shopping",       amt:273.15,  target:"Cash",                    source:"S", note:"$150 Dining + $123 Shopping — adjusted to balance budget" },
         // ── Laura Access ─────────────────────────────────────────────────
-        { id:"l4",  action:"Body Corp (Riverlily)",   amt:204.85,  target:"Laura Access",            note:"Based on latest levy" },
-        { id:"l6",  action:"Electricity",             amt:100.00,  target:"Laura Access",            note:"Electricity direct debit" },
-        { id:"l7",  action:"Gas",                     amt:100.00,  target:"Laura Access",            note:"Gas direct debit" },
-        { id:"l17", action:"Rates Riverlily",         amt:115.00,  target:"Laura Access",            note:"Council rates provision" },
-        { id:"l18", action:"Water Riverlily",         amt:130.00,  target:"Laura Access",            note:"Water rates provision" },
-        { id:"l9",  action:"Laura Gym EMF",           amt:90.00,   target:"Laura Access",            note:"Direct debit" },
-        { id:"l10", action:"OSHC Oli",                amt:40.00,   target:"Laura Access",            note:"Direct debit" },
-        { id:"l11", action:"Piano Martin",            amt:114.00,  target:"Laura Access",            note:"Music lessons" },
-        { id:"l12", action:"After the Bell Oli",      amt:60.00,   target:"Laura Access",            note:"Direct debit" },
-        { id:"l26", action:"Fortnightly Cleaning",    amt:120.00,  target:"Laura Access",            note:"Cleaning service" },
-        { id:"l21", action:"Optus",                   amt:217.00,  target:"Laura Access",            note:"Direct debit" },
-        { id:"l20", action:"Spriggy Martin",          amt:30.00,   target:"Laura Access",            note:"Kids pocket money app" },
-        { id:"l16", action:"Netflix",                 amt:20.00,   target:"Laura Access",            note:"Direct debit" },
-        { id:"l19", action:"YouTube",                 amt:17.00,   target:"Laura Access",            note:"Direct debit" },
-        { id:"l23", action:"Stan",                    amt:6.00,    target:"Laura Access",            note:"Direct debit" },
-        { id:"l24", action:"Google Storage",          amt:7.50,    target:"Laura Access",            note:"Direct debit" },
-        { id:"l25", action:"Microsoft Storage",       amt:1.50,    target:"Laura Access",            note:"Outlook storage direct debit" },
-        { id:"l27", action:"REMAINING SPENDING",      amt:0.00,    target:"Laura Access",            note:"Budget fully allocated", isBuffer:true }
+        { id:"l4",  action:"Body Corp (Riverlily)",   amt:204.85,  target:"Laura Access",            source:"S", note:"Based on latest levy" },
+        { id:"l6",  action:"Electricity",             amt:100.00,  target:"Laura Access",            source:"S", note:"Electricity direct debit" },
+        { id:"l7",  action:"Gas",                     amt:100.00,  target:"Laura Access",            source:"S", note:"Gas direct debit" },
+        { id:"l17", action:"Rates Riverlily",         amt:115.00,  target:"Laura Access",            source:"S", note:"Council rates provision" },
+        { id:"l18", action:"Water Riverlily",         amt:130.00,  target:"Laura Access",            source:"S", note:"Water rates provision" },
+        { id:"l9",  action:"Laura Gym EMF",           amt:90.00,   target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l10", action:"OSHC Oli",                amt:40.00,   target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l11", action:"Piano Martin",            amt:114.00,  target:"Laura Access",            source:"S", note:"Music lessons" },
+        { id:"l12", action:"After the Bell Oli",      amt:60.00,   target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l26", action:"Fortnightly Cleaning",    amt:120.00,  target:"Laura Access",            source:"S", note:"Cleaning service" },
+        { id:"l21", action:"Optus",                   amt:217.00,  target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l20", action:"Spriggy Martin",          amt:30.00,   target:"Laura Access",            source:"S", note:"Kids pocket money app" },
+        { id:"l16", action:"Netflix",                 amt:20.00,   target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l19", action:"YouTube",                 amt:17.00,   target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l23", action:"Stan",                    amt:6.00,    target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l24", action:"Google Storage",          amt:7.50,    target:"Laura Access",            source:"S", note:"Direct debit" },
+        { id:"l25", action:"Microsoft Storage",       amt:1.50,    target:"Laura Access",            source:"S", note:"Outlook storage direct debit" },
+        { id:"l27", action:"REMAINING SPENDING",      amt:0.00,    target:"Laura Access",            source:"S", note:"Budget fully allocated", isBuffer:true }
     ]
 };
 
@@ -1243,6 +1403,16 @@ function calculateNextPay(person) {
     el.className = 'pay-date' + (daysLeft <= 5 ? ' urgent' : '');
 }
 
+const incomeLines = {
+    julian: [
+        { label: 'Salary (CDSB)',          amt: 3625.63, note: 'Net fortnightly take-home' },
+        { label: 'Rhapsody rental income', amt: 1005.00, note: 'Avg net FY25 · varies by season' },
+    ],
+    laura: [
+        { label: 'Salary',                 amt: 3100.00, note: 'Net fortnightly take-home' },
+    ],
+};
+
 function loadProfile(person) {
     currentPerson = person;
     localStorage.setItem('mc_person', person);
@@ -1253,17 +1423,47 @@ function loadProfile(person) {
     container.innerHTML = '';
 
     let lastTarget = null;
+    let groupTotal = 0;
+    let grandTotal = 0;
+    let lastGroupHeader = null;
+    let lastGroupSubtotalEl = null;
 
-    profiles[person].forEach(item => {
-        // Insert account group header when target changes
+    const items = profiles[person];
+
+    items.forEach((item, idx) => {
+        const isLast = idx === items.length - 1;
+        const nextTarget = items[idx + 1]?.target;
+
+        // New group — insert header
         if (item.target !== lastTarget) {
+            // Close previous group subtotal
+            if (lastGroupSubtotalEl && groupTotal > 0) {
+                lastGroupSubtotalEl.querySelector('.group-subtotal-amt').textContent = fmt(groupTotal);
+            }
+            groupTotal = 0;
+
             const header = document.createElement('div');
             header.className = 'group-header';
-            header.textContent = item.target;
+            header.innerHTML = `<span>${item.target}</span><span class="group-subtotal-amt" style="font-family:var(--mono);font-size:0.9em;color:var(--muted)"></span>`;
             container.appendChild(header);
+            lastGroupHeader = header;
+            lastGroupSubtotalEl = header;
             lastTarget = item.target;
         }
 
+        // Accumulate group and grand totals (skip buffer)
+        if (!item.isBuffer) {
+            groupTotal += item.amt;
+            grandTotal += item.amt;
+        }
+
+        // Close group when target changes or on last item
+        const isGroupEnd = isLast || nextTarget !== item.target;
+        if (isGroupEnd && lastGroupSubtotalEl) {
+            lastGroupSubtotalEl.querySelector('.group-subtotal-amt').textContent = fmt(groupTotal);
+        }
+
+        // Render item
         const checked = getCheck(item.id);
         const el = document.createElement('div');
         el.className = (item.isBuffer ? 'buffer-row' : 'checklist-item') + (checked ? ' checked' : '');
@@ -1273,6 +1473,30 @@ function loadProfile(person) {
             ? `<span class="item-amount" style="color:var(--red)">-${fmt(Math.abs(item.amt))}</span>`
             : `<span class="item-amount">${fmt(item.amt)}</span>`;
 
+        const sourceTag = item.source === 'SPLIT'
+            ? (() => {
+                const r = item.splitAmt.rhapsody;
+                const s = item.splitAmt.salary;
+                const total = r + s;
+                const rPct = Math.round((r / total) * 100);
+                const sPct = 100 - rPct;
+                return `
+                    <div class="split-bar-wrap">
+                        <div class="split-bar">
+                            <div class="split-bar-r" style="width:${rPct}%"></div>
+                            <div class="split-bar-s" style="width:${sPct}%"></div>
+                        </div>
+                        <div class="split-labels">
+                            <span class="source-tag source-R">Rhapsody ${fmt(r)}</span>
+                            <span class="split-plus">+</span>
+                            <span class="source-tag source-S">Salary ${fmt(s)}</span>
+                        </div>
+                    </div>`;
+              })()
+            : item.source
+                ? `<span class="source-tag source-${item.source}">${item.source === 'S' ? 'Salary' : 'Rhapsody'}</span>`
+                : '';
+
         el.innerHTML = `
             <input type="checkbox" ${checked ? 'checked' : ''} onchange="handleCheck(this,'${item.id}')">
             <div class="item-body" onclick="this.parentElement.classList.toggle('expanded')">
@@ -1280,14 +1504,177 @@ function loadProfile(person) {
                     <span class="item-name">${item.action}</span>
                     ${amtDisplay}
                 </div>
-                <div class="item-meta">${item.target}</div>
+                <div class="item-meta">${item.target}${item.source && item.source !== 'SPLIT' ? ' ' + sourceTag : ''}</div>
+                ${item.source === 'SPLIT' ? sourceTag : ''}
                 <div class="item-note">${item.note}</div>
             </div>`;
 
         container.appendChild(el);
     });
 
+    // ── TOTAL COMMITTED ──────────────────────────────────────────────────
+    const divider = document.createElement('div');
+    divider.style.cssText = 'border-top:1.5px solid var(--text);margin:8px 0 0';
+    container.appendChild(divider);
+
+    const totalRow = document.createElement('div');
+    totalRow.className = 'checklist-summary-row';
+    totalRow.innerHTML = `
+        <span class="checklist-summary-label">Total Committed</span>
+        <span class="checklist-summary-amt" style="color:var(--red)">${fmt(grandTotal)}</span>`;
+    container.appendChild(totalRow);
+
+    // ── INCOME SECTION ───────────────────────────────────────────────────
+    const incomeHeader = document.createElement('div');
+    incomeHeader.className = 'group-header';
+    incomeHeader.style.marginTop = '20px';
+    incomeHeader.innerHTML = `<span>Income</span><span id="income-total" style="font-family:var(--mono);font-size:0.9em;color:var(--green)"></span>`;
+    container.appendChild(incomeHeader);
+
+    // Salary row (always fixed)
+    const salaryAmt = person === 'julian' ? 3625.63 : 3100.00;
+    const salaryRow = document.createElement('div');
+    salaryRow.className = 'checklist-item';
+    salaryRow.innerHTML = `
+        <div style="width:22px;flex-shrink:0"></div>
+        <div class="item-body">
+            <div class="item-row">
+                <span class="item-name">Salary ${person === 'julian' ? '(CDSB)' : ''}</span>
+                <span class="item-amount" style="color:var(--green)">${fmt(salaryAmt)}</span>
+            </div>
+            <div class="item-meta">Net fortnightly take-home</div>
+        </div>`;
+    container.appendChild(salaryRow);
+
+    // Rhapsody actual input — only for Julian
+    if (person === 'julian') {
+        const savedActual = parseFloat(localStorage.getItem('mc_rhapsody_actual') || '0');
+        const savedMonth  = localStorage.getItem('mc_rhapsody_month') || '';
+        const avgFn       = 1005.00; // FY25 average fortnightly
+        const actualFn    = savedActual > 0 ? savedActual / 2 : avgFn;
+        const usingActual = savedActual > 0;
+
+        const rhapsodyRow = document.createElement('div');
+        rhapsodyRow.className = 'checklist-item';
+        rhapsodyRow.id = 'rhapsody-income-row';
+        rhapsodyRow.innerHTML = `
+            <div style="width:22px;flex-shrink:0"></div>
+            <div class="item-body">
+                <div class="item-row">
+                    <span class="item-name">Rhapsody Income</span>
+                    <span class="item-amount" id="rhapsody-fn-display" style="color:${usingActual ? 'var(--green)' : 'var(--muted)'}">
+                        ${usingActual ? fmt(actualFn) + '/fn' : fmt(avgFn) + '/fn avg'}
+                    </span>
+                </div>
+                <div class="item-meta">
+                    ${usingActual
+                        ? `Actual: ${fmt(savedActual)} for ${savedMonth} ÷ 2 fortnights`
+                        : 'FY25 average — enter monthly actual below'}
+                </div>
+                <div class="rhapsody-actual-input">
+                    <div class="rhapsody-input-row">
+                        <div class="rhapsody-field">
+                            <label>Month</label>
+                            <input type="text" id="rhapsody-month-input" placeholder="e.g. May 2026"
+                                value="${savedMonth}"
+                                style="font-size:16px"
+                                onchange="updateRhapsodyActual()">
+                        </div>
+                        <div class="rhapsody-field">
+                            <label>Net payout ($)</label>
+                            <input type="number" id="rhapsody-actual-input" placeholder="e.g. 2154.18"
+                                value="${savedActual > 0 ? savedActual : ''}"
+                                style="font-size:16px"
+                                onchange="updateRhapsodyActual()">
+                        </div>
+                        <button class="rhapsody-clear-btn" onclick="clearRhapsodyActual()">Clear</button>
+                    </div>
+                    ${usingActual ? `
+                    <div class="rhapsody-variance">
+                        <span>vs avg ($1,005/fn):</span>
+                        <span style="color:${actualFn >= avgFn ? 'var(--green)' : 'var(--red)'}; font-weight:600">
+                            ${actualFn >= avgFn ? '+' : ''}${fmt(actualFn - avgFn)}/fn
+                        </span>
+                    </div>` : ''}
+                </div>
+            </div>`;
+        container.appendChild(rhapsodyRow);
+    }
+
+    // ── NET POSITION (reactive) ───────────────────────────────────────────
+    const divider2 = document.createElement('div');
+    divider2.style.cssText = 'border-top:1.5px solid var(--text);margin:8px 0 0';
+    container.appendChild(divider2);
+
+    const netRow = document.createElement('div');
+    netRow.className = 'checklist-summary-row';
+    netRow.id = 'net-position-row';
+    container.appendChild(netRow);
+
+    // Render income total and net position
+    updateNetPosition(grandTotal, person);
+
     calculateNextPay(person);
+}
+
+function getRhapsodyFn() {
+    const actual = parseFloat(localStorage.getItem('mc_rhapsody_actual') || '0');
+    return actual > 0 ? actual / 2 : 1005.00;
+}
+
+function updateRhapsodyActual() {
+    const month  = document.getElementById('rhapsody-month-input')?.value.trim() || '';
+    const actual = parseFloat(document.getElementById('rhapsody-actual-input')?.value || '0');
+    if (actual > 0) {
+        localStorage.setItem('mc_rhapsody_actual', actual);
+        localStorage.setItem('mc_rhapsody_month', month);
+    }
+    // Reload to reflect changes
+    loadProfile('julian');
+}
+
+function clearRhapsodyActual() {
+    localStorage.removeItem('mc_rhapsody_actual');
+    localStorage.removeItem('mc_rhapsody_month');
+    loadProfile('julian');
+}
+
+function updateNetPosition(grandTotal, person) {
+    const salaryAmt  = person === 'julian' ? 3625.63 : 3100.00;
+    const rhapsodyFn = person === 'julian' ? getRhapsodyFn() : 0;
+    const totalIncome = salaryAmt + rhapsodyFn;
+    const net = totalIncome - grandTotal;
+
+    // Update income total header
+    const incTotalEl = document.getElementById('income-total');
+    if (incTotalEl) incTotalEl.textContent = fmt(totalIncome);
+
+    // Update net position row
+    const netRow = document.getElementById('net-position-row');
+    if (netRow) {
+        netRow.innerHTML = `
+            <span class="checklist-summary-label">Net Position</span>
+            <span class="checklist-summary-amt" style="color:${net >= 0 ? 'var(--green)' : 'var(--red)'}">
+                ${net >= 0 ? '+' : '−'}${fmt(Math.abs(net))} ${net < 0 ? 'deficit' : 'surplus'}
+            </span>`;
+    }
+
+    // Update split bar on ME Bank item if Rhapsody actual is set
+    const splitBarR = document.querySelector('.split-bar-r');
+    const splitBarS = document.querySelector('.split-bar-s');
+    const splitLabels = document.querySelector('.split-labels');
+    if (splitBarR && splitBarS && splitLabels) {
+        const meBankAmt = 1965.38;
+        const rContrib  = Math.min(rhapsodyFn, meBankAmt);
+        const sContrib  = Math.max(0, meBankAmt - rContrib);
+        const rPct = Math.round((rContrib / meBankAmt) * 100);
+        splitBarR.style.width = rPct + '%';
+        splitBarS.style.width = (100 - rPct) + '%';
+        splitLabels.innerHTML = `
+            <span class="source-tag source-R">Rhapsody ${fmt(rContrib)}</span>
+            <span class="split-plus">+</span>
+            <span class="source-tag source-S">Salary ${fmt(sContrib)}</span>`;
+    }
 }
 
 function handleCheck(cb, id) {
