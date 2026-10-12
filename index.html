@@ -212,7 +212,7 @@
             transition: max-height 0.25s ease, opacity 0.2s;
         }
 
-        .expanded .item-note { max-height: 120px; opacity: 1; }
+        .expanded .item-note { max-height: 160px; opacity: 1; }
 
         .checked { opacity: 0.35; }
         .checked .item-name { text-decoration: line-through; }
@@ -319,6 +319,23 @@
         .s-value.green { color: var(--green); }
         .s-value.amber { color: var(--amber); }
         .s-value.red   { color: var(--red); }
+
+        /* ── LOAN SNAPSHOT ── */
+        .loan-snapshot { margin-top: 20px; }
+
+        .loan-snapshot-note {
+            font-size: 0.72em;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .loan-sub {
+            font-size: 0.72em;
+            color: var(--muted);
+            margin-top: 2px;
+            font-family: var(--mono);
+        }
 
         /* ── PACE BAR ── */
         .pace-section {
@@ -588,6 +605,11 @@
         .source-R {
             background: #fffbeb;
             color: var(--amber);
+        }
+
+        .source-L {
+            background: #f0fdf4;
+            color: var(--green);
         }
 
         /* ── RHAPSODY ACTUAL INPUT ── */
@@ -1002,7 +1024,7 @@
         }
 
         .plan-action.expanded .plan-action-detail {
-            max-height: 160px;
+            max-height: 220px;
             opacity: 1;
         }
 
@@ -1139,7 +1161,7 @@
     <!-- HEADER -->
     <div class="header">
         <div class="header-row">
-            <span class="app-name">Mission Control</span>
+            <span class="app-name">Mission Control · v5</span>
             <span class="pay-date" id="pay-date-display">Loading...</span>
         </div>
     </div>
@@ -1296,19 +1318,25 @@ const baseDates = {
     laura:  new Date(2026, 3, 29)
 };
 
+// ── v4: confirmed loan repayments (12 Oct 2026) ─────────────────────────
+// ME: main $3,958.20 + second $357.24 = $4,315.44/mth  -> x12/26 = $1,991.74/fn
+// Bluestone: minimum $2,244.98/mth -> x12/26 = $1,036.14/fn
+const ME_FN        = 1991.74;
+const BLUESTONE_FN = 1036.14;
+
 const profiles = {
     julian: [
         // ── Online Mortgage ──────────────────────────────────────────────
-        { id:"j1",  action:"Mortgage & Fixed Bills", amt:1965.38, target:"Online Mortgage",    source:"SPLIT", splitAmt:{rhapsody:1005.00, salary:960.38}, note:"ME Bank 5.49% · Rhapsody income covers $1,005/fn · Salary covers remaining $960.38/fn" },
-        { id:"j17", action:"Rhapsody Mortgage (Bluestone)", amt:1078.67, target:"Bluestone Mortgage", source:"S", note:"BSB: 067953 | Acc: 202449401 | Due by 28th each month · $2,336.46/mth = $1,078.67/fn" },
+        { id:"j1",  action:"ME Home Loan (2 splits)", amt:ME_FN, target:"Online Mortgage",    source:"SPLIT", splitAmt:{rhapsody:1005.00, salary:986.74}, note:"Main split $3,958.20 + second split $357.24 = $4,315.44/mth, due 22nd · $1,991.74/fn · Second split 6.39% (8 Oct) · Rhapsody income covers $1,005/fn · Salary covers the remaining $986.74/fn" },
+        { id:"j17", action:"Rhapsody Mortgage (Bluestone)", amt:BLUESTONE_FN, target:"Bluestone Mortgage", source:"S", note:"BSB: 067953 | Acc: 202449401 | Minimum $2,244.98/mth due 28th (next 28 Oct) · $1,036.14/fn · Rate 7.99% from 7 Oct, so the minimum may reset upward" },
         // ── Online Saver Transfers ───────────────────────────────────────
         { id:"j2",  action:"Tennis Coaching",               amt:300.00,  target:"Online Saver Transfers", source:"S", note:"Weekly sessions budget" },
-        { id:"j4",  action:"Body Corp (Rhapsody)",          amt:243.44,  target:"Online Saver Transfers", source:"R", note:"BPAY: Biller 96503 | Ref: 246704845" },
-        { id:"j5",  action:"Council Rates (Rhap)",          amt:95.00,   target:"Online Saver Transfers", source:"R", note:"Provision for rates" },
+        { id:"j4",  action:"Body Corp (Rhapsody)",          amt:202.78,  target:"Online Saver Transfers", source:"R", note:"BPAY: Biller 96503 | Ref: 246704845 · Levy recalculated Oct 2026 (was $243.44)" },
+        { id:"j5",  action:"Council Rates (Rhap)",          amt:218.04,  target:"Online Saver Transfers", source:"R", note:"Rates notice Aug 2026: $2,834.48 per half-year with 10% discount ($2,955.51 council + $131.00 state - $252.03) · $218.04/fn · Water billed separately" },
         { id:"j6",  action:"Water Rates (Rhap)",            amt:50.00,   target:"Online Saver Transfers", source:"R", note:"Provision for water" },
-        { id:"j7",  action:"Schooling/Tutoring",            amt:300.00,  target:"Online Saver Transfers", source:"S", note:"Future fees budget" },
+        { id:"j7",  action:"Hillcrest Martin",                amt:300.00,  target:"Online Saver Transfers", source:"S", note:"Future fees budget" },
         // ── Progress Saver ───────────────────────────────────────────────
-        { id:"j8",  action:"Watch & Emilio Funds",          amt:100.00,  target:"Progress Saver",         source:"S", note:"$0 Watch paused | $100 Martin Emilio" },
+        { id:"j8",  action:"Watch & Emilio Funds",          amt:50.00,   target:"Progress Saver",         source:"S", note:"$0 Watch paused | $50 Martin Emilio" },
         { id:"j9",  action:"Project Snowflake",             amt:150.00,  target:"Progress Saver",         source:"S", note:"Internal Transfer — reduced temporarily" },
         // ── Credit Card (ANZ Rewards) ────────────────────────────────────
         { id:"j3a", action:"ANZ Rewards CC Payment",        amt:150.00,  target:"Credit Card",            source:"S", note:"Base credit card payment — reduced temporarily" },
@@ -1316,11 +1344,9 @@ const profiles = {
         { id:"j12", action:"Google Storage",                amt:19.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
         { id:"j13", action:"Car Wash & Maintenance",        amt:20.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
         { id:"j14", action:"EV Charging",                   amt:15.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
-        { id:"j15", action:"Psychology",                    amt:50.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
-        { id:"j16", action:"Basketball & Tennis Regs",      amt:15.00,   target:"Credit Card",            source:"S", note:"Charged to ANZ Rewards CC" },
         // ── Access Advantage ─────────────────────────────────────────────
-        { id:"j10", action:"Health & Subs",                 amt:50.00,   target:"Access Advantage",       source:"S", note:"Hold for direct debits" },
-        { id:"j11", action:"DISCRETIONARY",                 amt:0.00,   target:"Access Advantage",       source:"S", note:"Temporarily zeroed — restore once IO switch confirmed", isBuffer:true }
+        { id:"j10", action:"Health & Subs",                 amt:112.07,  target:"Access Advantage",       source:"S", note:"Debited from: Goodlife $19.83/wk ($39.66) from Access Advantage (salary account) · Aussie MPP $44.44/mth ($20.51) from Access Advantage · Disney $24.99/mth ($11.53), 16 Sep from Access Advantage debit card (17 Aug was on the ANZ Rewards CC) · Anthropic ($37.60) on ANZ Rewards CC · Pharmacy ($2.77) on ANZ Rewards CC · Was $50.00" },
+        { id:"j11", action:"DISCRETIONARY",                 amt:96.00,  target:"Access Advantage",       source:"S", note:"Coffees: 12 per fortnight at $8 average. Other discretionary is zeroed until the refinance settles and new repayments are confirmed", isBuffer:true }
     ],
     laura: [
         // ── Laura Payments ───────────────────────────────────────────────
@@ -1340,8 +1366,9 @@ const profiles = {
         { id:"l8",  action:"Dining & Shopping",       amt:273.15,  target:"Cash",                    source:"S", note:"$150 Dining + $123 Shopping — adjusted to balance budget" },
         // ── Laura Access ─────────────────────────────────────────────────
         { id:"l4",  action:"Body Corp (Riverlily)",   amt:204.85,  target:"Laura Access",            source:"S", note:"Based on latest levy" },
-        { id:"l6",  action:"Electricity",             amt:100.00,  target:"Laura Access",            source:"S", note:"Electricity direct debit" },
+        { id:"l6",  action:"Electricity",             amt:63.78,   target:"Laura Access",            source:"S", note:"Electricity direct debit · Reduced by $36.22 so the GloBird line fits within the $3,100 budget" },
         { id:"l7",  action:"Gas",                     amt:100.00,  target:"Laura Access",            source:"S", note:"Gas direct debit" },
+        { id:"l28", action:"GloBird (gas + electricity)", amt:36.22,  target:"Laura Access",            source:"S", note:"Laura pays from Oct 2026 · Bill $72.44 per 28 days (gas $50.00 + electricity $22.44, 31 Aug to 27 Sep) · $36.22/fn · Direct debit 14 Oct" },
         { id:"l17", action:"Rates Riverlily",         amt:115.00,  target:"Laura Access",            source:"S", note:"Council rates provision" },
         { id:"l18", action:"Water Riverlily",         amt:130.00,  target:"Laura Access",            source:"S", note:"Water rates provision" },
         { id:"l9",  action:"Laura Gym EMF",           amt:90.00,   target:"Laura Access",            source:"S", note:"Direct debit" },
@@ -1359,6 +1386,23 @@ const profiles = {
         { id:"l27", action:"REMAINING SPENDING",      amt:0.00,    target:"Laura Access",            source:"S", note:"Budget fully allocated", isBuffer:true }
     ]
 };
+
+// ── v4: loan snapshot (read-only reference, confirmed from lender portals) ──
+const LOAN_SNAPSHOT = {
+    asAt: '12 Oct 2026',
+    rows: [
+        { name:'ME main split',   bal:'$628,709.79', balNote:'as at 28 Sep', rate:'to confirm', min:3958.20, due:'22 Oct' },
+        { name:'ME second split', bal:'$56,457.79',  balNote:'as at 8 Oct',  rate:'6.39%',      min:357.24,  due:'22 Oct' },
+        { name:'Bluestone (Rhapsody)', bal:'$304,438.40', balNote:'as at 7 Oct', rate:'7.99%', min:2244.98, due:'28 Oct' }
+    ]
+};
+
+// ── v5: Rhapsody owner statements (verified from Rhapsody Resort statements) ──
+// Monthly payout to fortnightly: x12/26. Baseline planning average stays FY25 ($26,137 / yr = $1,005/fn).
+const RHAPSODY_STATEMENTS = [
+    { month:'Aug 2026', gross:4839.22, fee:2235.72, cc:36.39, exp:457.27, oneOff:435.27, owner:2109.84, note:'Expenses include one-offs: TV $334.00, TV install $75.00, mattress protector $26.27. Recurring: Foxtel $22.00' },
+    { month:'Sep 2026', gross:8151.67, fee:3766.09, cc:12.59, exp:336.06, oneOff:0,      owner:4036.93, note:'Expenses: Origin electricity and gas Jun to Sep $314.06, Foxtel $22.00. Includes Aug bookings paid in Sep. School holiday month' }
+];
 
 // ═══════════════════════ HELPERS ═══════════════════════
 
@@ -1405,13 +1449,60 @@ function calculateNextPay(person) {
 
 const incomeLines = {
     julian: [
-        { label: 'Salary (CDSB)',          amt: 3625.63, note: 'Net fortnightly take-home' },
+        { label: 'Salary (CDSB)',          amt: 3737.23, note: 'Net fortnightly take-home (confirmed 18 Aug, 1 Sep, 15 Sep)' },
         { label: 'Rhapsody rental income', amt: 1005.00, note: 'Avg net FY25 · varies by season' },
     ],
     laura: [
         { label: 'Salary',                 amt: 3100.00, note: 'Net fortnightly take-home' },
     ],
 };
+
+function renderLoanSnapshot(container) {
+    const wrap = document.createElement('div');
+    wrap.className = 'loan-snapshot';
+
+    const header = document.createElement('div');
+    header.className = 'group-header';
+    header.innerHTML = `<span>Loan Snapshot</span><span style="font-family:var(--mono);font-size:0.9em;color:var(--muted)">${LOAN_SNAPSHOT.asAt}</span>`;
+    wrap.appendChild(header);
+
+    const block = document.createElement('div');
+    block.className = 'summary-block';
+    block.style.marginTop = '10px';
+
+    let totalMin = 0;
+    LOAN_SNAPSHOT.rows.forEach(r => {
+        totalMin += r.min;
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        row.innerHTML = `
+            <div>
+                <div class="s-label" style="color:var(--text);font-weight:500">${r.name}</div>
+                <div class="loan-sub">${r.bal} · ${r.balNote} · ${r.rate}</div>
+            </div>
+            <div style="text-align:right">
+                <div class="s-value">${fmt(r.min)}</div>
+                <div class="loan-sub">due ${r.due}</div>
+            </div>`;
+        block.appendChild(row);
+    });
+
+    const totalRow = document.createElement('div');
+    totalRow.className = 'summary-row';
+    totalRow.innerHTML = `
+        <span class="s-label" style="color:var(--text);font-weight:600">Total monthly minimums</span>
+        <span class="s-value" style="font-weight:600">${fmt(totalMin)}</span>`;
+    block.appendChild(totalRow);
+
+    wrap.appendChild(block);
+
+    const note = document.createElement('div');
+    note.className = 'loan-snapshot-note';
+    note.textContent = 'Current loans only. The planned refinance (ME $846k, Bluestone $305k) is not included until it settles. Repayment minimums may reset after the October rate rises.';
+    wrap.appendChild(note);
+
+    container.appendChild(wrap);
+}
 
 function loadProfile(person) {
     currentPerson = person;
@@ -1452,7 +1543,8 @@ function loadProfile(person) {
         }
 
         // Accumulate group and grand totals (skip buffer)
-        if (!item.isBuffer) {
+        // v5: source L (paid by Laura) is shown but not charged to Julian's budget
+        if ((!item.isBuffer || item.amt > 0) && item.source !== 'L') {  // v5: a positive Discretionary budget counts as spend
             groupTotal += item.amt;
             grandTotal += item.amt;
         }
@@ -1494,7 +1586,7 @@ function loadProfile(person) {
                     </div>`;
               })()
             : item.source
-                ? `<span class="source-tag source-${item.source}">${item.source === 'S' ? 'Salary' : 'Rhapsody'}</span>`
+                ? `<span class="source-tag source-${item.source}">${item.source === 'S' ? 'Salary' : item.source === 'L' ? 'Laura' : 'Rhapsody'}</span>`
                 : '';
 
         el.innerHTML = `
@@ -1532,7 +1624,7 @@ function loadProfile(person) {
     container.appendChild(incomeHeader);
 
     // Salary row (always fixed)
-    const salaryAmt = person === 'julian' ? 3625.63 : 3100.00;
+    const salaryAmt = person === 'julian' ? 3737.23 : 3100.00;
     const salaryRow = document.createElement('div');
     salaryRow.className = 'checklist-item';
     salaryRow.innerHTML = `
@@ -1551,7 +1643,7 @@ function loadProfile(person) {
         const savedActual = parseFloat(localStorage.getItem('mc_rhapsody_actual') || '0');
         const savedMonth  = localStorage.getItem('mc_rhapsody_month') || '';
         const avgFn       = 1005.00; // FY25 average fortnightly
-        const actualFn    = savedActual > 0 ? savedActual / 2 : avgFn;
+        const actualFn    = savedActual > 0 ? savedActual * 12 / 26 : avgFn;
         const usingActual = savedActual > 0;
 
         const rhapsodyRow = document.createElement('div');
@@ -1568,8 +1660,8 @@ function loadProfile(person) {
                 </div>
                 <div class="item-meta">
                     ${usingActual
-                        ? `Actual: ${fmt(savedActual)} for ${savedMonth} ÷ 2 fortnights`
-                        : 'FY25 average — enter monthly actual below'}
+                        ? `Actual: ${fmt(savedActual)} for ${savedMonth} × 12 ÷ 26 fortnights`
+                        : 'Planning average: FY25 verified full year ($26,137). Enter a monthly actual below to override'}
                 </div>
                 <div class="rhapsody-actual-input">
                     <div class="rhapsody-input-row">
@@ -1597,6 +1689,7 @@ function loadProfile(person) {
                         </span>
                     </div>` : ''}
                 </div>
+                ${renderRhapsodyStatements(avgFn)}
             </div>`;
         container.appendChild(rhapsodyRow);
     }
@@ -1614,12 +1707,42 @@ function loadProfile(person) {
     // Render income total and net position
     updateNetPosition(grandTotal, person);
 
+    // v4: loan snapshot for Julian
+    if (person === 'julian') renderLoanSnapshot(container);
+
     calculateNextPay(person);
+}
+
+function renderRhapsodyStatements(avgFn) {
+    const toFn = m => m * 12 / 26;
+    const rows = RHAPSODY_STATEMENTS.map(r => {
+        const fnv = toFn(r.owner);
+        const d = fnv - avgFn;
+        return `<div style="padding:6px 0;border-top:1px solid var(--border);font-size:0.78em">
+            <div style="display:flex;justify-content:space-between;gap:8px"><strong>${r.month}</strong>
+              <span style="font-family:var(--mono)">${fmt(r.owner)} paid · ${fmt(fnv)}/fn
+              <span style="color:${d >= 0 ? 'var(--green)' : 'var(--red)'}">(${d >= 0 ? '+' : '−'}${fmt(Math.abs(d))})</span></span></div>
+            <div style="color:var(--muted)">Gross ${fmt(r.gross)} · Mgmt fee ${fmt(r.fee)} (${(r.fee / r.gross * 100).toFixed(1)}%) · Card comm ${fmt(r.cc)} · Expenses ${fmt(r.exp)}</div>
+            <div style="color:var(--muted)">${r.note}</div>
+        </div>`;
+    }).join('');
+    const tot = RHAPSODY_STATEMENTS.reduce((a, r) => a + r.owner, 0);
+    const adj = RHAPSODY_STATEMENTS.reduce((a, r) => a + r.owner + r.oneOff, 0);
+    const n = RHAPSODY_STATEMENTS.length;
+    return `<div style="margin-top:10px">
+        <div style="font-size:0.72em;font-weight:700;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase">Owner statements</div>
+        ${rows}
+        <div style="padding:6px 0;border-top:1px solid var(--border);font-size:0.78em;font-family:var(--mono)">
+            Avg of ${n} months: ${fmt(tot / n)} · ${fmt(toFn(tot / n))}/fn<br>
+            Excluding one-offs: ${fmt(adj / n)} · ${fmt(toFn(adj / n))}/fn<br>
+            <span style="color:var(--muted)">Two seasonal months, not used as the planning average. FY25 Aug and Sep were $1,537 and $882.</span>
+        </div>
+    </div>`;
 }
 
 function getRhapsodyFn() {
     const actual = parseFloat(localStorage.getItem('mc_rhapsody_actual') || '0');
-    return actual > 0 ? actual / 2 : 1005.00;
+    return actual > 0 ? actual * 12 / 26 : 1005.00;
 }
 
 function updateRhapsodyActual() {
@@ -1640,7 +1763,7 @@ function clearRhapsodyActual() {
 }
 
 function updateNetPosition(grandTotal, person) {
-    const salaryAmt  = person === 'julian' ? 3625.63 : 3100.00;
+    const salaryAmt  = person === 'julian' ? 3737.23 : 3100.00;
     const rhapsodyFn = person === 'julian' ? getRhapsodyFn() : 0;
     const totalIncome = salaryAmt + rhapsodyFn;
     const net = totalIncome - grandTotal;
@@ -1664,7 +1787,7 @@ function updateNetPosition(grandTotal, person) {
     const splitBarS = document.querySelector('.split-bar-s');
     const splitLabels = document.querySelector('.split-labels');
     if (splitBarR && splitBarS && splitLabels) {
-        const meBankAmt = 1965.38;
+        const meBankAmt = ME_FN;
         const rContrib  = Math.min(rhapsodyFn, meBankAmt);
         const sContrib  = Math.max(0, meBankAmt - rContrib);
         const rPct = Math.round((rContrib / meBankAmt) * 100);
@@ -2221,11 +2344,11 @@ const PLAN_ACTIONS = [
       owner:'Julian', deadline:'28 Apr 2026',
       detail:'EXISTING: Aussie MPP (Policy 239112, since Apr 2017) — Julian death $139k + living $42k, Laura death $70k + living $21k. Cost $44.44/month from ANZ account. NEW (applied 28 Apr): ANZ Super/Zurich — Julian TPD $500k + IP $11,000/month. Combined Julian death cover: $439k. IP gap still open — standalone policy needed.',
       impact:'Most critical gaps closed · MPP review needed' },
-    { id:'a02', phase:'ph0', num:'A02', badge:'motion', badgeTxt:'In Motion',
-      title:'Contact mortgage broker — Bluestone IO switch',
+    { id:'a02', phase:'ph0', num:'A02', badge:'done', badgeTxt:'Done ✓',
+      title:'Bluestone IO switch: contacted broker, decided against IO',
       owner:'Julian', deadline:'28 Apr 2026',
-      detail:'Broker contacted to initiate interest-only variation request with Bluestone on Rhapsody loan ($308,763 @ 7.49%). Target: IO approval within 30 days. If approved saves ~$203/fn.',
-      impact:'~$203/fn cash flow improvement' },
+      detail:'Broker contacted in April about an interest-only variation on the Rhapsody loan. Bluestone offered 1 year IO only (+0.30% loading, $390 switch fee). Decision: continue P&I. The refinance route (A05) replaces this.',
+      impact:'IO not pursued · P&I continues' },
     // Phase 1
     { id:'a03', phase:'ph1', num:'A03', badge:'week', badgeTxt:'This Week',
       title:'Confirm ANZ Super TPD & IP cover is active',
@@ -2242,11 +2365,11 @@ const PLAN_ACTIONS = [
       owner:'Julian', deadline:'31 May 2026',
       detail:'Contact insurance broker for standalone income protection: 30-day waiting period, 5-year benefit period, 75% salary ($11,188/month). Compare TAL, AIA, MLC, Zurich. Premiums are tax-deductible outside super. Once active, cancel the ANZ Super IP (90-day wait) to stop super erosion.',
       impact:'Reduces IP waiting period from 90 to 30 days' },
-    { id:'a05', phase:'ph1', num:'A05', badge:'upcoming', badgeTxt:'Month 1',
-      title:'Confirm Bluestone IO switch outcome',
-      owner:'Julian + Broker', deadline:'31 May 2026',
-      detail:'Chase broker for Bluestone IO variation result. If approved: repayment drops from $1,168/fn to ~$965/fn. If refused: activate contingency — ME Bank cross-securitisation or Scenario C (sell).',
-      impact:'$203/fn saving — core lever of the plan' },
+    { id:'a05', phase:'ph1', num:'A05', badge:'motion', badgeTxt:'In Motion',
+      title:'Refinance with broker (Joe Wong): ME $846k, Bluestone $305k',
+      owner:'Julian + Broker', deadline:'31 Oct 2026',
+      detail:'Decided Oct 2026: ME to $846k (6.34% quote) and Bluestone to $305k (6.67% quote), with the cash held in the offset. The quotes predate the October rate rises, so confirm final rates, fees and the offset link before settlement. Until it settles, the Checklist shows the current confirmed repayments.',
+      impact:'Bluestone repayment falls about $318/mth (est.) · ~$161k cash out' },
     { id:'a06', phase:'ph1', num:'A06', badge:'upcoming', badgeTxt:'Month 1–2',
       title:'Switch Rhapsody to long-term tenancy',
       owner:'Julian + Laura', deadline:'30 Jun 2026',
@@ -2434,14 +2557,7 @@ function togglePlanAction(cb, id) {
         pct === 0 ? 'Plan approved — ready to execute' :
         pct === 100 ? '🎉 All actions complete' :
         `${pct}% complete · ${PLAN_ACTIONS.length - doneCount} actions remaining`;
-    // Re-render phase progress counts
-    PLAN_PHASES.forEach(phase => {
-        const phaseActions = PLAN_ACTIONS.filter(a => a.phase === phase.id);
-        const phaseDone = phaseActions.filter(a => getPlanDone(a.id)).length;
-        const headers = document.querySelectorAll('.plan-phase-prog');
-        // Find matching header by iterating plan phases
-    });
-    // Simple: update all phase prog counts
+    // Update all phase prog counts
     document.querySelectorAll('.plan-phase').forEach((phEl, i) => {
         const phase = PLAN_PHASES[i];
         const phaseActions = PLAN_ACTIONS.filter(a => a.phase === phase.id);
